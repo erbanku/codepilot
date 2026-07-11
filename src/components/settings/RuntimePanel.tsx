@@ -758,15 +758,18 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
     setConflictCheckSaving(true);
     setConflictCheckEnabled(checked);
     try {
-      await fetch("/api/settings/app", {
+      const res = await fetch("/api/settings/app", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           settings: { runtime_conflict_check_enabled: checked ? "true" : "false" },
         }),
       });
+      if (!res.ok) throw new Error("save failed");
     } catch {
-      /* ignore — next load will re-read the persisted value */
+      // Roll back the optimistic flip so the switch doesn't show a
+      // state that never made it to disk.
+      setConflictCheckEnabled(!checked);
     } finally {
       setConflictCheckSaving(false);
     }
@@ -1225,10 +1228,11 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
               who want it surfaced (e.g. debugging a stale preference)
               can turn it back on here. */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[11px] text-muted-foreground">
+            <label htmlFor="runtime-conflict-check-toggle" className="text-[11px] text-muted-foreground">
               {isZh ? "冲突检测" : "Conflict check"}
-            </span>
+            </label>
             <Switch
+              id="runtime-conflict-check-toggle"
               checked={conflictCheckEnabled}
               onCheckedChange={handleConflictCheckToggle}
               disabled={conflictCheckSaving}
