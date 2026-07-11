@@ -17,23 +17,23 @@
 用户在另一台 Mac 上替换旧安装包后发现几个 P0 信号：
 
 1. **版本仍显示 0.53**：本次本地打包只用 `electron-builder --config.extraMetadata.version=0.55.0-preview.2` 临时覆盖了 Electron 包元数据，但仓库 `package.json` 仍是 `0.53.0`。应用内多处读取 `package.json` / `NEXT_PUBLIC_APP_VERSION` / packaged standalone 里的版本，因此 Info.plist 与 UI / runtime clientInfo 可能不一致。后续禁止只靠 `extraMetadata.version` 做 preview 版本。
-2. **Codex 应用服务启动失败**：用户日志 `/Users/op7418/Downloads/codepilot-main_副本.log` 显示 packaged app 仍在以旧参数启动 Codex：`codex app-server --listen ...`，真实 Codex 0.133 报 `unexpected argument '--listen' found`。这说明该安装包没有包含当前 P0 修复，或打包输入/产物来源不受控。
+2. **Codex 应用服务启动失败**：用户日志 `/Users/erbanku/Downloads/codepilot-main_副本.log` 显示 packaged app 仍在以旧参数启动 Codex：`codex app-server --listen ...`，真实 Codex 0.133 报 `unexpected argument '--listen' found`。这说明该安装包没有包含当前 P0 修复，或打包输入/产物来源不受控。
 3. **Claude Code 输入框一直“正在准备运行环境” / 模型加载中**：同一日志显示 `Claude Code compat API error: 503 model_not_found`，模型为 `sonnet` 时落到错误的渠道/别名：`分组 auto 下模型 sonnet 无可用渠道`。这同样属于 packaged smoke 必须覆盖的 Runtime P0，不能只看单元测试或开发态 smoke。
 
 结论：`release-preview-p0-0.55.0-preview.2/` 这类本地临时产物只可作为**诊断样本**，不得继续给外部测试用户。下一个可分发包必须先修版本源、确认打包 commit、再走 packaged app 真实启动 smoke。
 
 ## 状态
 
-| Phase | 内容 | 用户能看到什么 | 状态 | 备注 |
-|-------|------|----------------|------|------|
-| 0 | 预览边界与版本策略 | 不会静默升级；测试用户明确拿到 Preview 包 | ✅ 版本单源已修 | `package.json` + lock bump 到 `0.55.0-preview.4`（>0.54.0）；NEXT_PUBLIC_APP_VERSION / app.getVersion / Codex clientInfo 全部派生自 package.json，已核实。剩签名/绕过说明（P2，非阻断） |
-| 1 | 必修用户可见问题 | Mac 通知、默认模型提示、Plan Widget、Windows shell 方言修正 | 🟢 源码已修，待 packaged smoke | 两个 runtime P0（Codex `--listen` / ClaudeCode `sonnet`）**已由 `6923f13` 在 HEAD 修复 + 回归 pin 通过**（坏包是 6923f13 之前的过时构建）；剩 packaged app 真机/CI smoke 确认 |
-| 2 | Windows Preview Readiness | Windows 包不像 macOS 硬搬；命令默认 PowerShell 兼容 | 📋 待开始 | #28 代码已修（默认 PowerShell，bash 只认显式 opt-in），真机验收 blocking |
-| 3 | macOS Preview Readiness | macOS 视觉与通知路径可验证；已知系统设置限制有说明 | 📋 待开始 | #34 链路已确认 delivered/acked，真机通知权限核查 blocking |
-| 4 | 打包与安装验证 | macOS / Windows 安装包能安装、启动、跑核心 smoke | 🔄 workflow 就绪，待 CI run | 旧 macOS 包废弃；下次只打 macOS arm64 + Windows x64，经 `preview-build.yml` 产出（用户触发） |
-| 4A | GitHub Preview CI | 用 CI 产出可复现 artifacts，减少本机环境漂移 | ✅ 已加 `preview-build.yml` | `workflow_dispatch`（输入 preview_version / build_macos_arm64 / build_windows_x64 / commit_sha）；verify-source gate（typecheck + 6923f13 回归 pin + 全量单测）→ 版本单源 patch（非 extraMetadata，diff 上传 audit）→ mac arm64 / win x64 构建 → 版本 + native ABI 校验 → 只传 artifacts/SHA/commit/logs，**不建 Release、不推 tag**（`permissions: contents: read` + `--publish never`） |
-| 5 | 小范围试用与反馈闭环 | 用户知道测什么、怎么回滚、怎么报问题 | 🔄 进行中 | 预览包说明 + P0 反馈表见 [`docs/preview/branch-preview-2026-05-31.md`](../../preview/branch-preview-2026-05-31.md) |
-| 6 | 合并 / 不合并决策 | 有明确 go/no-go 标准 | 📋 待开始 | 不用聊天拍脑袋 |
+| Phase | 内容                      | 用户能看到什么                                              | 状态                           | 备注                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----- | ------------------------- | ----------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | 预览边界与版本策略        | 不会静默升级；测试用户明确拿到 Preview 包                   | ✅ 版本单源已修                | `package.json` + lock bump 到 `0.55.0-preview.4`（>0.54.0）；NEXT_PUBLIC_APP_VERSION / app.getVersion / Codex clientInfo 全部派生自 package.json，已核实。剩签名/绕过说明（P2，非阻断）                                                                                                                                                                                                   |
+| 1     | 必修用户可见问题          | Mac 通知、默认模型提示、Plan Widget、Windows shell 方言修正 | 🟢 源码已修，待 packaged smoke | 两个 runtime P0（Codex `--listen` / ClaudeCode `sonnet`）**已由 `6923f13` 在 HEAD 修复 + 回归 pin 通过**（坏包是 6923f13 之前的过时构建）；剩 packaged app 真机/CI smoke 确认                                                                                                                                                                                                             |
+| 2     | Windows Preview Readiness | Windows 包不像 macOS 硬搬；命令默认 PowerShell 兼容         | 📋 待开始                      | #28 代码已修（默认 PowerShell，bash 只认显式 opt-in），真机验收 blocking                                                                                                                                                                                                                                                                                                                  |
+| 3     | macOS Preview Readiness   | macOS 视觉与通知路径可验证；已知系统设置限制有说明          | 📋 待开始                      | #34 链路已确认 delivered/acked，真机通知权限核查 blocking                                                                                                                                                                                                                                                                                                                                 |
+| 4     | 打包与安装验证            | macOS / Windows 安装包能安装、启动、跑核心 smoke            | 🔄 workflow 就绪，待 CI run    | 旧 macOS 包废弃；下次只打 macOS arm64 + Windows x64，经 `preview-build.yml` 产出（用户触发）                                                                                                                                                                                                                                                                                              |
+| 4A    | GitHub Preview CI         | 用 CI 产出可复现 artifacts，减少本机环境漂移                | ✅ 已加 `preview-build.yml`    | `workflow_dispatch`（输入 preview_version / build_macos_arm64 / build_windows_x64 / commit_sha）；verify-source gate（typecheck + 6923f13 回归 pin + 全量单测）→ 版本单源 patch（非 extraMetadata，diff 上传 audit）→ mac arm64 / win x64 构建 → 版本 + native ABI 校验 → 只传 artifacts/SHA/commit/logs，**不建 Release、不推 tag**（`permissions: contents: read` + `--publish never`） |
+| 5     | 小范围试用与反馈闭环      | 用户知道测什么、怎么回滚、怎么报问题                        | 🔄 进行中                      | 预览包说明 + P0 反馈表见 [`docs/preview/branch-preview-2026-05-31.md`](../../preview/branch-preview-2026-05-31.md)                                                                                                                                                                                                                                                                        |
+| 6     | 合并 / 不合并决策         | 有明确 go/no-go 标准                                        | 📋 待开始                      | 不用聊天拍脑袋                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## 发布边界
 
@@ -119,15 +119,15 @@
 
 ### 怎么验收
 
-| 问题 | 验收 |
-|------|------|
-| packaged P0: Codex app-server | packaged app 日志中不再出现 `codex app-server ... --listen` / `unexpected argument '--listen'`；Settings Runtime 显示 Codex ready 或 installed_idle 的正确状态；发一条 Codex Account / Codex Runtime smoke 不报应用服务启动失败 |
-| packaged P0: ClaudeCode 准备运行环境 | packaged app 中 ClaudeCode Runtime 输入框不再长期停在"正在准备运行环境"；`sonnet` / 默认模型解析不再落到 `model_not_found`；至少跑一条 ClaudeCode smoke marker |
-| packaged P0: 版本显示 | packaged app 外部 metadata 与 app 内 UI 均显示同一 preview version，且高于 `0.54.0` |
-| #34 Mac 通知 | 3 分钟定时任务触发后，macOS 系统通知弹出；如果系统权限阻止，聊天 / 状态区有可见 fallback；日志能说明通知出口是否调用 |
-| #27 pin-incomplete | 构造 `default_mode='pinned'` + `default_model` 有值 + `default_model_provider` 缺失，Runtime / Health 文案都说"固定信息不完整"，不再说当前引擎不可用 |
-| #26 Plan Widget | Native Plan 模式要求创建 Widget，能输出合法 `show-widget`；回归测试证明 `codepilot_load_widget_guidelines` 与 Widget prompt 保留，mutating 工具不保留 |
-| #28 Windows shell | Windows shell fixture 中不出现 `export` / `source` / `rm -rf` / `/tmp` 等 bash-only 语法；真实或接近真实 Windows smoke 验证命令可复制执行 |
+| 问题                                 | 验收                                                                                                                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| packaged P0: Codex app-server        | packaged app 日志中不再出现 `codex app-server ... --listen` / `unexpected argument '--listen'`；Settings Runtime 显示 Codex ready 或 installed_idle 的正确状态；发一条 Codex Account / Codex Runtime smoke 不报应用服务启动失败 |
+| packaged P0: ClaudeCode 准备运行环境 | packaged app 中 ClaudeCode Runtime 输入框不再长期停在"正在准备运行环境"；`sonnet` / 默认模型解析不再落到 `model_not_found`；至少跑一条 ClaudeCode smoke marker                                                                  |
+| packaged P0: 版本显示                | packaged app 外部 metadata 与 app 内 UI 均显示同一 preview version，且高于 `0.54.0`                                                                                                                                             |
+| #34 Mac 通知                         | 3 分钟定时任务触发后，macOS 系统通知弹出；如果系统权限阻止，聊天 / 状态区有可见 fallback；日志能说明通知出口是否调用                                                                                                            |
+| #27 pin-incomplete                   | 构造 `default_mode='pinned'` + `default_model` 有值 + `default_model_provider` 缺失，Runtime / Health 文案都说"固定信息不完整"，不再说当前引擎不可用                                                                            |
+| #26 Plan Widget                      | Native Plan 模式要求创建 Widget，能输出合法 `show-widget`；回归测试证明 `codepilot_load_widget_guidelines` 与 Widget prompt 保留，mutating 工具不保留                                                                           |
+| #28 Windows shell                    | Windows shell fixture 中不出现 `export` / `source` / `rm -rf` / `/tmp` 等 bash-only 语法；真实或接近真实 Windows smoke 验证命令可复制执行                                                                                       |
 
 ### 实现路径（不需用户审阅）
 
@@ -214,10 +214,10 @@ macOS 预览包保留本轮新视觉，但不因为透明 / vibrancy / floating 
 
 ### 怎么验收
 
-| 平台 | 产物 | 必验 |
-|------|------|------|
+| 平台        | 产物      | 必验                                                                   |
+| ----------- | --------- | ---------------------------------------------------------------------- |
 | macOS arm64 | DMG / zip | 安装、启动、版本显示、Codex status、ClaudeCode smoke、Settings Runtime |
-| Windows x64 | NSIS | 安装、启动、版本显示、标题栏、Settings、Chat、PowerShell 命令 smoke |
+| Windows x64 | NSIS      | 安装、启动、版本显示、标题栏、Settings、Chat、PowerShell 命令 smoke    |
 
 ### 实现路径（不需用户审阅）
 
@@ -327,21 +327,21 @@ macOS 预览包保留本轮新视觉，但不因为透明 / vibrancy / floating 
 
 > 跑了真实 smoke 后必须追加一行。Preview 包 smoke 不能只写"我试了可以"，必须写平台 / runtime / provider / 场景 / 结果 / 证据。
 
-| Date | Platform | Runtime | Provider / Model | 凭据形态 | 场景 | Result | Evidence |
-|------|----------|---------|------------------|---------|------|--------|----------|
-| 2026-05-29 | macOS dev | native | OpenRouter / `anthropic/claude-opus-4.8` | 本机 OpenRouter provider | Phase A Opus 4.8 marker | ✅ | `OPENROUTER_OPUS48_OK`；登记于 `post-refactor-cleanup.md` |
-| 2026-05-29 | macOS dev | claude_code | Claude Code account / `claude-opus-4-8` | 本机 Claude Code 授权 | Phase A Opus 4.8 两轮 | ✅ | `OPUS48_CLAUDE_ACCOUNT_A_OK` / `B_OK`；登记于 `post-refactor-cleanup.md` |
-| 2026-05-29 | macOS dev | claude_code | OpenRouter / `anthropic/claude-sonnet-4.6` | 本机 OpenRouter provider | #23 Sonnet 4.6 两轮 | ✅ | `SONNET46_SMOKE_A_OK` / `B_OK`；登记于 `post-refactor-cleanup.md` |
-| 2026-05-31 | macOS packaged | N/A | N/A | N/A | Apple Silicon ad-hoc DMG 构建校验 | ✅ | `release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-arm64.dmg`; SHA-256 `7965d9f51df41814c86785d0a16cc64966f5a9dc1692f35e0c10ee684ed285a8`; `codesign --deep --strict` + `hdiutil verify` 通过 |
-| 2026-05-31 | macOS packaged | N/A | N/A | N/A | Intel x64 ad-hoc DMG 构建校验 | ✅ | `release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-x64.dmg`; SHA-256 `be65141fd48643439f0d95a9cd94e56cd3e5fe2ed686cf91a8096d22bd351bd0`; `codesign --deep --strict` + `hdiutil verify` 通过 |
-| 2026-05-31 | macOS packaged | N/A | N/A | N/A | Developer ID 路径构建校验 | ❌ | `release/` 产物生成但 `codesign --verify --deep --strict` 失败；不分发给测试用户 |
-| 2026-05-31 | macOS packaged | N/A | N/A | N/A | `0.55.0-preview.2` 本地临时包安装 smoke | ❌ | 用户实测：app 内仍显示 `0.53`；Codex app-server 启动失败；ClaudeCode 输入框一直"正在准备运行环境"。日志 `/Users/op7418/Downloads/codepilot-main_副本.log`：`Version changed from 0.54.0 to 0.53.0`、`codex app-server error: unexpected argument '--listen' found`、`model_not_found ... sonnet`。该包废弃，不再分发 |
-| 2026-06-01 | dev (worktree) | N/A | N/A | N/A | 版本单源 bump 校验（P0-版本） | ✅ | `package.json` + lock（root + packages['']）= `0.55.0-preview.4`；NEXT_PUBLIC_APP_VERSION（next.config:48 派生）/ `app.getVersion`（Info.plist）/ Codex clientInfo（`readCodePilotVersion` 读 pkg.version）全部同源 |
-| 2026-05-31 | dev (worktree) | N/A | N/A | N/A | 6923f13 P0 回归 pin（Codex/ClaudeCode） | ✅ | `codex-binary-discovery.test.ts` "spawns app-server without --listen" + `provider-resolver.test.ts` "canonicalizes short role-model aliases to upstream IDs" 全过 → 两个 runtime P0 在 HEAD 已修，坏包系 6923f13 前过时构建 |
-| 待跑 | macOS arm64 packaged | TBD | TBD | TBD | `preview-build.yml` CI：版本显示 + native ABI + 启动（无凭据） | ⏳ | 用户触发 workflow_dispatch（preview_version=`0.55.0-preview.4`）|
-| 待跑 | Windows x64 packaged | TBD | TBD | TBD | `preview-build.yml` CI：版本 + ABI + 启动（无凭据） | ⏳ | windows-latest job |
-| 待跑 | macOS packaged | TBD | TBD | TBD | 真机安装 + Codex/ClaudeCode 真实凭据 marker | ⏳ | 用户本机安装 smoke（CI 不跑真实凭据）|
-| 待跑 | Windows packaged | TBD | TBD | TBD | 真机安装 + Windows shell command smoke | ⏳ | |
+| Date       | Platform             | Runtime     | Provider / Model                           | 凭据形态                 | 场景                                                           | Result | Evidence                                                                                                                                                                                                                                                                                                              |
+| ---------- | -------------------- | ----------- | ------------------------------------------ | ------------------------ | -------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-29 | macOS dev            | native      | OpenRouter / `anthropic/claude-opus-4.8`   | 本机 OpenRouter provider | Phase A Opus 4.8 marker                                        | ✅     | `OPENROUTER_OPUS48_OK`；登记于 `post-refactor-cleanup.md`                                                                                                                                                                                                                                                             |
+| 2026-05-29 | macOS dev            | claude_code | Claude Code account / `claude-opus-4-8`    | 本机 Claude Code 授权    | Phase A Opus 4.8 两轮                                          | ✅     | `OPUS48_CLAUDE_ACCOUNT_A_OK` / `B_OK`；登记于 `post-refactor-cleanup.md`                                                                                                                                                                                                                                              |
+| 2026-05-29 | macOS dev            | claude_code | OpenRouter / `anthropic/claude-sonnet-4.6` | 本机 OpenRouter provider | #23 Sonnet 4.6 两轮                                            | ✅     | `SONNET46_SMOKE_A_OK` / `B_OK`；登记于 `post-refactor-cleanup.md`                                                                                                                                                                                                                                                     |
+| 2026-05-31 | macOS packaged       | N/A         | N/A                                        | N/A                      | Apple Silicon ad-hoc DMG 构建校验                              | ✅     | `release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-arm64.dmg`; SHA-256 `7965d9f51df41814c86785d0a16cc64966f5a9dc1692f35e0c10ee684ed285a8`; `codesign --deep --strict` + `hdiutil verify` 通过                                                                                                            |
+| 2026-05-31 | macOS packaged       | N/A         | N/A                                        | N/A                      | Intel x64 ad-hoc DMG 构建校验                                  | ✅     | `release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-x64.dmg`; SHA-256 `be65141fd48643439f0d95a9cd94e56cd3e5fe2ed686cf91a8096d22bd351bd0`; `codesign --deep --strict` + `hdiutil verify` 通过                                                                                                              |
+| 2026-05-31 | macOS packaged       | N/A         | N/A                                        | N/A                      | Developer ID 路径构建校验                                      | ❌     | `release/` 产物生成但 `codesign --verify --deep --strict` 失败；不分发给测试用户                                                                                                                                                                                                                                      |
+| 2026-05-31 | macOS packaged       | N/A         | N/A                                        | N/A                      | `0.55.0-preview.2` 本地临时包安装 smoke                        | ❌     | 用户实测：app 内仍显示 `0.53`；Codex app-server 启动失败；ClaudeCode 输入框一直"正在准备运行环境"。日志 `/Users/erbanku/Downloads/codepilot-main_副本.log`：`Version changed from 0.54.0 to 0.53.0`、`codex app-server error: unexpected argument '--listen' found`、`model_not_found ... sonnet`。该包废弃，不再分发 |
+| 2026-06-01 | dev (worktree)       | N/A         | N/A                                        | N/A                      | 版本单源 bump 校验（P0-版本）                                  | ✅     | `package.json` + lock（root + packages['']）= `0.55.0-preview.4`；NEXT_PUBLIC_APP_VERSION（next.config:48 派生）/ `app.getVersion`（Info.plist）/ Codex clientInfo（`readCodePilotVersion` 读 pkg.version）全部同源                                                                                                   |
+| 2026-05-31 | dev (worktree)       | N/A         | N/A                                        | N/A                      | 6923f13 P0 回归 pin（Codex/ClaudeCode）                        | ✅     | `codex-binary-discovery.test.ts` "spawns app-server without --listen" + `provider-resolver.test.ts` "canonicalizes short role-model aliases to upstream IDs" 全过 → 两个 runtime P0 在 HEAD 已修，坏包系 6923f13 前过时构建                                                                                           |
+| 待跑       | macOS arm64 packaged | TBD         | TBD                                        | TBD                      | `preview-build.yml` CI：版本显示 + native ABI + 启动（无凭据） | ⏳     | 用户触发 workflow_dispatch（preview_version=`0.55.0-preview.4`）                                                                                                                                                                                                                                                      |
+| 待跑       | Windows x64 packaged | TBD         | TBD                                        | TBD                      | `preview-build.yml` CI：版本 + ABI + 启动（无凭据）            | ⏳     | windows-latest job                                                                                                                                                                                                                                                                                                    |
+| 待跑       | macOS packaged       | TBD         | TBD                                        | TBD                      | 真机安装 + Codex/ClaudeCode 真实凭据 marker                    | ⏳     | 用户本机安装 smoke（CI 不跑真实凭据）                                                                                                                                                                                                                                                                                 |
+| 待跑       | Windows packaged     | TBD         | TBD                                        | TBD                      | 真机安装 + Windows shell command smoke                         | ⏳     |                                                                                                                                                                                                                                                                                                                       |
 
 ## 详细自审 / Codex Review Checklist
 

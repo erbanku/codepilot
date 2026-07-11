@@ -52,7 +52,7 @@
 
 当前活跃 assistant workspace：
 
-- `/Users/guohao/Documents/op7418的仓库`
+- `/Users/guohao/Documents/erbanku的仓库`
 
 我对这条链路做了本机拆分测量，结果如下：
 

@@ -1,26 +1,26 @@
-import { Star } from 'lucide-react';
-import { CapabilityIcon } from './IconMap';
-import type { MarketingContent } from '../../../content/marketing/en';
+import { Star } from "lucide-react";
+import { CapabilityIcon } from "./IconMap";
+import type { MarketingContent } from "../../../content/marketing/en";
 
 async function getStarCount(): Promise<string> {
   try {
-    const res = await fetch('https://api.github.com/repos/op7418/CodePilot', {
+    const res = await fetch("https://api.github.com/repos/erbanku/CodePilot", {
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return '3.4k';
+    if (!res.ok) return "3.4k";
     const data = await res.json();
     const count = data.stargazers_count;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
     return String(count);
   } catch {
-    return '3.4k';
+    return "3.4k";
   }
 }
 
 export async function IntegrationsSection({
   content,
 }: {
-  content: MarketingContent['openSource'];
+  content: MarketingContent["openSource"];
   locale?: string;
 }) {
   const stars = await getStarCount();
@@ -30,7 +30,7 @@ export async function IntegrationsSection({
       <div className="mx-auto max-w-[800px] px-6">
         {/* Two-tone title */}
         <h2 className="max-w-2xl text-2xl font-bold leading-snug md:text-3xl">
-          <span className="text-foreground">{content.title}</span>{' '}
+          <span className="text-foreground">{content.title}</span>{" "}
           <span className="text-muted-foreground">{content.titleLight}</span>
         </h2>
 
@@ -67,7 +67,6 @@ export async function IntegrationsSection({
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );

@@ -11,7 +11,7 @@
 
 本次调查使用用户提供的日志副本：
 
-- `/Users/op7418/Downloads/codepilot-main_副本 4.log`
+- `/Users/erbanku/Downloads/codepilot-main_副本 4.log`
 - 文件大小：`12,498,072,118` bytes，约 12G。
 - 文件创建：2026-05-31 15:12:56，本次样本最后修改：2026-06-08 14:28:51。
 
@@ -205,11 +205,11 @@ interesting_keyword_lines=3
 
 ## Smoke Ledger
 
-| 日期 | Runtime | 触发场景 | 结果 | 证据 |
-|------|---------|----------|------|------|
-| 2026-06-08 | Codex Runtime | 用户日志离线分析，tail 50MB 聚合 | ✅ 日志暴涨已证实；闪退未定案 | `69995` 行中 `69253` 行为 `codex_core::tasks`；尾部出现 app-server exit + 新 session start |
-| 2026-06-08 | 单元 | P0+P1 实现单测 | ✅ rotation / serverErrors ring / tracing filter / RUST_LOG warn / crash breadcrumb 全部实现 + 16 单测 | `bounded-line-ring` / `main-log-rotation` / `codex-trace-filter` 测试；主 tsc 0 + 全量 3290 |
-| _待跑_ | Codex Runtime | live `require_escalated` / network approval | 📋 | 需要真实 app-server + 用户授权；验收见下方标准 |
+| 日期       | Runtime       | 触发场景                                    | 结果                                                                                                   | 证据                                                                                        |
+| ---------- | ------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| 2026-06-08 | Codex Runtime | 用户日志离线分析，tail 50MB 聚合            | ✅ 日志暴涨已证实；闪退未定案                                                                          | `69995` 行中 `69253` 行为 `codex_core::tasks`；尾部出现 app-server exit + 新 session start  |
+| 2026-06-08 | 单元          | P0+P1 实现单测                              | ✅ rotation / serverErrors ring / tracing filter / RUST_LOG warn / crash breadcrumb 全部实现 + 16 单测 | `bounded-line-ring` / `main-log-rotation` / `codex-trace-filter` 测试；主 tsc 0 + 全量 3290 |
+| _待跑_     | Codex Runtime | live `require_escalated` / network approval | 📋                                                                                                     | 需要真实 app-server + 用户授权；验收见下方标准                                              |
 
 ## 给 Claude Code 的优先级
 

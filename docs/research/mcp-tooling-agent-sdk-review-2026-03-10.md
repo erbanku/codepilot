@@ -28,9 +28,9 @@
 
 证据：
 
-- [src/app/api/plugins/mcp/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L81)
-- [src/components/plugins/McpServerEditor.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpServerEditor.tsx#L158)
-- [src/components/plugins/McpManager.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpManager.tsx#L144)
+- [src/app/api/plugins/mcp/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L81)
+- [src/components/plugins/McpServerEditor.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpServerEditor.tsx#L158)
+- [src/components/plugins/McpManager.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpManager.tsx#L144)
 
 当前实现：
 
@@ -52,16 +52,16 @@
 
 证据：
 
-- [src/app/api/plugins/mcp/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L43)
-- [src/app/api/plugins/mcp/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L61)
-- [src/app/api/plugins/mcp/%5Bname%5D/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/%5Bname%5D/route.ts#L30)
+- [src/app/api/plugins/mcp/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L43)
+- [src/app/api/plugins/mcp/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L61)
+- [src/app/api/plugins/mcp/%5Bname%5D/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/%5Bname%5D/route.ts#L30)
 
 当前实现：
 
 - `GET /api/plugins/mcp` 会把：
   - `~/.claude.json`
   - `~/.claude/settings.json`
-  合并后返回。
+    合并后返回。
 - 但 `PUT /api/plugins/mcp` 和 `DELETE /api/plugins/mcp/[name]` 只操作 `~/.claude/settings.json`。
 
 结果：
@@ -76,8 +76,8 @@
 
 证据：
 
-- [src/app/api/plugins/mcp/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L12)
-- [src/app/api/plugins/mcp/%5Bname%5D/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/%5Bname%5D/route.ts#L7)
+- [src/app/api/plugins/mcp/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts#L12)
+- [src/app/api/plugins/mcp/%5Bname%5D/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/%5Bname%5D/route.ts#L7)
 
 当前实现只读写：
 
@@ -102,12 +102,12 @@
 
 证据：
 
-- [src/types/index.ts](/Users/op7418/Documents/code/opus-4.6-test/src/types/index.ts#L454)
-- [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L97)
-- [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L400)
-- [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L541)
-- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/op7418/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L252)
-- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/op7418/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L1580)
+- [src/types/index.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/types/index.ts#L454)
+- [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L97)
+- [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L400)
+- [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L541)
+- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/erbanku/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L252)
+- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/erbanku/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L1580)
 
 官方 custom tools 文档描述的是：
 
@@ -134,9 +134,9 @@
 
 证据：
 
-- [src/components/plugins/McpServerList.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpServerList.tsx#L41)
-- [src/components/plugins/McpServerList.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpServerList.tsx#L163)
-- [src/app/api/plugins/mcp/status/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/status/route.ts#L8)
+- [src/components/plugins/McpServerList.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpServerList.tsx#L41)
+- [src/components/plugins/McpServerList.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpServerList.tsx#L163)
+- [src/app/api/plugins/mcp/status/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/status/route.ts#L8)
 
 当前实现：
 
@@ -161,9 +161,9 @@
 
 证据：
 
-- [src/components/plugins/McpManager.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpManager.tsx#L53)
-- [src/app/api/plugins/mcp/status/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/status/route.ts#L8)
-- [src/components/plugins/McpServerList.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpServerList.tsx#L163)
+- [src/components/plugins/McpManager.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpManager.tsx#L53)
+- [src/app/api/plugins/mcp/status/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/status/route.ts#L8)
+- [src/components/plugins/McpServerList.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpServerList.tsx#L163)
 
 当前实现：
 
@@ -182,9 +182,9 @@
 
 证据：
 
-- [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L797)
-- [src/types/index.ts](/Users/op7418/Documents/code/opus-4.6-test/src/types/index.ts#L389)
-- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/op7418/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L1593)
+- [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L797)
+- [src/types/index.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/types/index.ts#L389)
+- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/erbanku/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L1593)
 
 当前实现：
 
@@ -209,8 +209,8 @@
 
 证据：
 
-- [src/components/chat/ToolCallBlock.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/ToolCallBlock.tsx#L32)
-- [src/components/chat/ToolCallBlock.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/ToolCallBlock.tsx#L57)
+- [src/components/chat/ToolCallBlock.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/ToolCallBlock.tsx#L32)
+- [src/components/chat/ToolCallBlock.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/ToolCallBlock.tsx#L57)
 
 当前实现里，工具分类只针对：
 
@@ -244,8 +244,8 @@
 
 优先改：
 
-- [src/app/api/plugins/mcp/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts)
-- [src/components/plugins/McpServerEditor.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpServerEditor.tsx)
+- [src/app/api/plugins/mcp/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts)
+- [src/components/plugins/McpServerEditor.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpServerEditor.tsx)
 
 要求：
 
@@ -256,9 +256,9 @@
 
 优先改：
 
-- [src/app/api/plugins/mcp/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts)
-- [src/app/api/plugins/mcp/%5Bname%5D/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/%5Bname%5D/route.ts)
-- [src/components/plugins/McpManager.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/plugins/McpManager.tsx)
+- [src/app/api/plugins/mcp/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/route.ts)
+- [src/app/api/plugins/mcp/%5Bname%5D/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/plugins/mcp/%5Bname%5D/route.ts)
+- [src/components/plugins/McpManager.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/plugins/McpManager.tsx)
 
 建议：
 

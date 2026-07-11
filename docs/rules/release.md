@@ -31,22 +31,27 @@ macOS 产出 DMG（arm64 + x64），Windows 产出 NSIS 安装包。`scripts/aft
 > 一句话版本摘要，说明这个版本的核心主题或推荐升级理由。
 
 ### 新增功能
+
 - 功能描述（面向用户的语言，不要写 commit hash）
 
 ### 修复问题
+
 - 修复了 xxx 的问题
 
 ### 优化改进
+
 - 优化了 xxx
 
 ## 下载地址
 
 ### macOS
-- [Apple Silicon (M1/M2/M3/M4)](https://github.com/op7418/CodePilot/releases/download/v{版本号}/CodePilot-{版本号}-arm64.dmg)
-- [Intel](https://github.com/op7418/CodePilot/releases/download/v{版本号}/CodePilot-{版本号}-x64.dmg)
+
+- [Apple Silicon (M1/M2/M3/M4)](https://github.com/erbanku/CodePilot/releases/download/v{版本号}/CodePilot-{版本号}-arm64.dmg)
+- [Intel](https://github.com/erbanku/CodePilot/releases/download/v{版本号}/CodePilot-{版本号}-x64.dmg)
 
 ### Windows
-- [Windows 安装包](https://github.com/op7418/CodePilot/releases/download/v{版本号}/CodePilot.Setup.{版本号}.exe)
+
+- [Windows 安装包](https://github.com/erbanku/CodePilot/releases/download/v{版本号}/CodePilot.Setup.{版本号}.exe)
 
 ## 安装说明
 

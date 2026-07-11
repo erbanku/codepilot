@@ -14,6 +14,7 @@ CodePilot — Codex 的桌面 GUI 客户端，基于 Electron + Next.js。
 - **Codex** — 审查测试、复现分析、执行计划、文档化，**不承担代码实现**。
 
 **Codex 角色边界（硬规则）：**
+
 - 可以：审查代码、阅读日志、定位风险、设计复现路径、运行测试、生成修复计划；修改文档 / 执行计划 / 研究记录 / 交接材料 / 测试用例。
 - 绝对不能：修改产品代码、运行时代码、构建脚本、数据库 schema、样式实现、业务逻辑实现文件。需要代码修复时只输出方案和 diff 建议，交由 Claude Code 实施。
 
@@ -67,5 +68,10 @@ CodePilot — Codex 的桌面 GUI 客户端，基于 Electron + Next.js。
 - **Off:** Settings → Runtime hides preference-vs-actual drift banner; `/api/claude-status` skips `findAllClaudeBinaries` and does not emit `otherInstalls` / "N other Claude CLI installation(s) detected".
 - **On:** drift banner + multi-install scan/warnings enabled; toggle save triggers status refresh.
 - `claudeInstallIdentityKey()` dedupes npm/bun wrapper vs `node_modules/@anthropic-ai/claude-code` as one install.
+
+## App update check (2026-07-11)
+
+- `GET /api/app/updates` fetches `https://api.github.com/repos/erbanku/codepilot/releases/latest` (5 min revalidate).
+- Compares `tag_name` vs `NEXT_PUBLIC_APP_VERSION` from `package.json`; native Electron auto-updater is disabled.
 
 Last updated: 2026-07-11

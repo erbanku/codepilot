@@ -22,10 +22,10 @@
  * before dispatching to tool.execute.
  *
  * Reference: docs/research/hermes-agent-analysis.md §1.3, §3.1
- * Upstream:  /Users/op7418/Documents/code/资料/hermes-agent-main/run_agent.py:213-336
+ * Upstream:  /Users/erbanku/Documents/code/资料/hermes-agent-main/run_agent.py:213-336
  */
 
-import path from 'path';
+import path from "path";
 
 /**
  * Tools that must NEVER run in parallel because they require user
@@ -44,13 +44,13 @@ export const NEVER_PARALLEL_TOOLS: ReadonlySet<string> = new Set<string>([]);
  * read-side MCP tools from `codepilot_*`.
  */
 export const PARALLEL_SAFE_TOOLS: ReadonlySet<string> = new Set<string>([
-  'Read',
-  'Glob',
-  'Grep',
-  'WebFetch',
-  'codepilot_memory_search',
-  'codepilot_memory_get',
-  'codepilot_memory_recent',
+  "Read",
+  "Glob",
+  "Grep",
+  "WebFetch",
+  "codepilot_memory_search",
+  "codepilot_memory_get",
+  "codepilot_memory_recent",
 ]);
 
 /**
@@ -63,9 +63,9 @@ export const PARALLEL_SAFE_TOOLS: ReadonlySet<string> = new Set<string>([
  * reads of the exact same path still serialize (conservative).
  */
 export const PATH_SCOPED_TOOLS: ReadonlySet<string> = new Set<string>([
-  'Read',
-  'Write',
-  'Edit',
+  "Read",
+  "Write",
+  "Edit",
 ]);
 
 /** Maximum concurrent workers mirrors Hermes' `_MAX_TOOL_WORKERS`. */
@@ -77,16 +77,16 @@ export const MAX_PARALLEL_TOOL_WORKERS = 8;
  */
 const DESTRUCTIVE_PATTERNS = new RegExp(
   [
-    '(?:^|\\s|&&|\\|\\||;|`)(?:',
-    'rm\\s|rmdir\\s|',
-    'mv\\s|',
-    'sed\\s+-i|',
-    'truncate\\s|',
-    'dd\\s|',
-    'shred\\s|',
-    'git\\s+(?:reset|clean|checkout)\\s',
-    ')',
-  ].join(''),
+    "(?:^|\\s|&&|\\|\\||;|`)(?:",
+    "rm\\s|rmdir\\s|",
+    "mv\\s|",
+    "sed\\s+-i|",
+    "truncate\\s|",
+    "dd\\s|",
+    "shred\\s|",
+    "git\\s+(?:reset|clean|checkout)\\s",
+    ")",
+  ].join(""),
 );
 
 /**
@@ -169,15 +169,15 @@ export function extractScopePath(
   if (!PATH_SCOPED_TOOLS.has(toolName)) return null;
 
   const rawPath =
-    (typeof args.file_path === 'string' ? (args.file_path as string) : null) ??
-    (typeof args.path === 'string' ? (args.path as string) : null);
+    (typeof args.file_path === "string" ? (args.file_path as string) : null) ??
+    (typeof args.path === "string" ? (args.path as string) : null);
 
-  if (rawPath === null || rawPath.trim() === '') return null;
+  if (rawPath === null || rawPath.trim() === "") return null;
 
   // Expand leading ~ to the user's home directory.
   let expanded = rawPath;
-  if (expanded.startsWith('~')) {
-    const home = process.env.HOME || process.env.USERPROFILE || '';
+  if (expanded.startsWith("~")) {
+    const home = process.env.HOME || process.env.USERPROFILE || "";
     if (home) {
       expanded = path.join(home, expanded.slice(1));
     }

@@ -2,20 +2,21 @@
 
 > 创建时间：2026-04-15
 > 关联：`issue-tracker.md` B-001、Sentry `No provider credentials available`（1,462 events / 14d，Top 2）
-> Issues：[#461](https://github.com/op7418/CodePilot/issues/461)、[#478](https://github.com/op7418/CodePilot/issues/478)、[#476](https://github.com/op7418/CodePilot/issues/476)、[#457](https://github.com/op7418/CodePilot/issues/457)、[#470](https://github.com/op7418/CodePilot/issues/470)
+> Issues：[#461](https://github.com/erbanku/CodePilot/issues/461)、[#478](https://github.com/erbanku/CodePilot/issues/478)、[#476](https://github.com/erbanku/CodePilot/issues/476)、[#457](https://github.com/erbanku/CodePilot/issues/457)、[#470](https://github.com/erbanku/CodePilot/issues/470)
 
 ## 一、用户报告摘要
 
-| # | 用户 | 平台 | 关键陈述 |
-|---|---|---|---|
-| 461 | patgdut | macOS | "0.46.0 以后的版本都无法使用最新的 Claude Code"，回退到 0.45 正常 |
-| 461 | Theo-jobs | macOS | "本地通过 cc-switch 配置的，之前是可以的；走 API 可以，CLI 不行" |
-| 461 | patgdut | — | "这个检测是不准的，你实际发一句 Who are you 是可以通的" |
-| 478 | patgdut | — | "使用 cc-switch 后一直报错无法使用" |
-| 476 | — | Windows | "配置 openrouter 一直提示不通过，cc-switch 切换后本地 claude 可以使用" |
-| 466 | patgdut | — | 根因分析："打包版每次启动随机端口 → localStorage 清空"——另一类已知问题 |
+| #   | 用户      | 平台    | 关键陈述                                                               |
+| --- | --------- | ------- | ---------------------------------------------------------------------- |
+| 461 | patgdut   | macOS   | "0.46.0 以后的版本都无法使用最新的 Claude Code"，回退到 0.45 正常      |
+| 461 | Theo-jobs | macOS   | "本地通过 cc-switch 配置的，之前是可以的；走 API 可以，CLI 不行"       |
+| 461 | patgdut   | —       | "这个检测是不准的，你实际发一句 Who are you 是可以通的"                |
+| 478 | patgdut   | —       | "使用 cc-switch 后一直报错无法使用"                                    |
+| 476 | —         | Windows | "配置 openrouter 一直提示不通过，cc-switch 切换后本地 claude 可以使用" |
+| 466 | patgdut   | —       | 根因分析："打包版每次启动随机端口 → localStorage 清空"——另一类已知问题 |
 
 **共同特征：**
+
 - 都用 cc-switch 作为 Claude Code CLI 的凭据管理器
 - CodePilot 侧没有在 UI 里配 provider（或配了也不是 cc-switch 那一套）
 - 终端直接跑 `claude` 可用
@@ -25,13 +26,14 @@
 
 ### 2.1 cc-switch 的凭据注入机制
 
-查 `/Users/op7418/Documents/code/资料/cc-switch-main`：
+查 `/Users/erbanku/Documents/code/资料/cc-switch-main`：
 
 **写入点 A：`~/.claude/settings.json` 的 `env` 块**
 
 `src-tauri/src/config.rs:73-86` → `get_claude_settings_path()` 返回 `~/.claude/settings.json`（legacy 兼容 `claude.json`）。
 
 `src-tauri/src/provider.rs:493-502`：
+
 ```rust
 let settings_config = serde_json::json!({
     "env": {
@@ -56,6 +58,7 @@ let settings_config = serde_json::json!({
 `node_modules/@anthropic-ai/claude-agent-sdk/cli.js` 实测：
 
 **settings.env 合并逻辑（压缩代码还原）：**
+
 ```js
 if (A.env && typeof A.env === "object") {
   for (let [z, w] of Object.entries(A.env))
@@ -66,6 +69,7 @@ if (A.env && typeof A.env === "object") {
 ```
 
 **`rG6` 黑名单（67 项，完整列表在 `node_modules/@anthropic-ai/claude-agent-sdk/cli.js` 内）关键断言：**
+
 - ❌ `ANTHROPIC_API_KEY` — **不在黑名单**，会被应用
 - ❌ `ANTHROPIC_AUTH_TOKEN` — **不在黑名单**，会被应用
 - ❌ `ANTHROPIC_BASE_URL` — **不在黑名单**，会被应用
@@ -81,10 +85,11 @@ if (A.env && typeof A.env === "object") {
 
 ```ts
 function hasCredentialsForRequest(providerId?: string): boolean {
-  if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) return true;
-  if (getSetting('anthropic_auth_token')) return true;  // CodePilot 自己的 DB
-  if (providerId === 'env') return false;
-  if (providerId && providerId !== 'env') {
+  if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)
+    return true;
+  if (getSetting("anthropic_auth_token")) return true; // CodePilot 自己的 DB
+  if (providerId === "env") return false;
+  if (providerId && providerId !== "env") {
     const p = getProvider(providerId);
     if (p?.api_key) return true;
     // ...
@@ -98,6 +103,7 @@ function hasCredentialsForRequest(providerId?: string): boolean {
 ```
 
 **检测源只有三个：**
+
 1. `process.env.ANTHROPIC_*`
 2. `getSetting()` 读 CodePilot 自己的 DB（`sdk_settings` 表）
 3. CodePilot DB 的 `providers` 表
@@ -107,21 +113,24 @@ function hasCredentialsForRequest(providerId?: string): boolean {
 ### 2.4 auto 模式路由到 native runtime → 死路
 
 `src/lib/runtime/registry.ts:92-132` — **`resolveRuntime()`**：
+
 ```ts
 // 3. Auto: prefer SDK only if CLI exists AND Anthropic credentials are available.
-const sdk = getRuntime('claude-code-sdk');
+const sdk = getRuntime("claude-code-sdk");
 if (sdk?.isAvailable() && hasCredentialsForRequest(providerId)) return sdk;
 
-const native = getRuntime('native');
+const native = getRuntime("native");
 if (native?.isAvailable()) return native;
 ```
 
 cc-switch 用户在 auto 模式下：
+
 - `sdk.isAvailable()` = true（CLI 二进制存在）
 - `hasCredentialsForRequest()` = **false**（看不到 settings.json）
 - → 走 native runtime
 
 Native runtime 调 `src/lib/ai-provider.ts:56` → `createModel()`：
+
 ```ts
 export function createModel(opts: CreateModelOptions = {}): CreateModelResult {
   const resolved = resolveProvider({ ... });
@@ -141,6 +150,7 @@ export function createModel(opts: CreateModelOptions = {}): CreateModelResult {
 ### 2.5 手动切换到 "Claude Code SDK" runtime 是唯一现成 workaround
 
 若用户在设置里把 `agent_runtime` 改成 `claude-code-sdk`（不是 auto）：
+
 - `resolveRuntime()` line 110-112 显式分支 → 返回 SDK runtime
 - 走 `claude-client.ts:498 streamClaudeSdk()` 路径
 - `src/lib/provider-resolver.ts:653` env 模式 `settingSources: ['user', 'project', 'local']`
@@ -151,11 +161,12 @@ export function createModel(opts: CreateModelOptions = {}): CreateModelResult {
 ### 2.6 dead code 确认：`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST`
 
 `src/lib/provider-resolver.ts:314-318`：
+
 ```ts
 // Prevent ~/.claude/settings.json from overriding CodePilot's provider configuration.
 // When set, Claude Code CLI's withoutHostManagedProviderVars() strips all provider-routing
 // variables from the user's settings file (see upstream managedEnv.ts / managedEnvConstants.ts).
-env.CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST = '1';
+env.CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST = "1";
 ```
 
 `grep CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST node_modules/@anthropic-ai/claude-agent-sdk/cli.js` → **0 hits**。
@@ -166,18 +177,19 @@ SDK 0.2.62 里根本没有这个变量，也没有 `withoutHostManagedProviderVa
 
 ### 2.7 用户说 "0.46.0 就不行了" 的真实对应
 
-| 版本 | 日期 | 关键变更 | 影响 |
-|---|---|---|---|
-| v0.46.0 | 2026-04-04 00:04 | `89d3e97` Ollama 支持等 | 未直接涉及凭据链 |
-| v0.47.0 | 2026-04-05 00:27 | `6324490` host takeover（引入 MANAGED_BY_HOST 死代码） | 无功能影响 |
-| v0.48.0 | 2026-04-09 13:47 | `fc61c69` auto mode checks Anthropic creds before preferring SDK (#456) | **引入** |
-| v0.48.1-2 | 2026-04-11 | `a4c72e4` hasCredentialsForRequest + 3 轮修复 | **问题锁死** |
+| 版本      | 日期             | 关键变更                                                                | 影响             |
+| --------- | ---------------- | ----------------------------------------------------------------------- | ---------------- |
+| v0.46.0   | 2026-04-04 00:04 | `89d3e97` Ollama 支持等                                                 | 未直接涉及凭据链 |
+| v0.47.0   | 2026-04-05 00:27 | `6324490` host takeover（引入 MANAGED_BY_HOST 死代码）                  | 无功能影响       |
+| v0.48.0   | 2026-04-09 13:47 | `fc61c69` auto mode checks Anthropic creds before preferring SDK (#456) | **引入**         |
+| v0.48.1-2 | 2026-04-11       | `a4c72e4` hasCredentialsForRequest + 3 轮修复                           | **问题锁死**     |
 
 **真实转折点：v0.48.0。** 用户说"0.46 以后"可能是版本记忆误差，或者他们在 0.46 升级到 0.48 后才稳定报错。
 
 ### 2.8 #474 不是本 bug
 
 抓 `#474` 附件 `codepilot-doctor-2026-04-13.json`：
+
 - 用户 provider ID: `b00e9f73e2b99e8e5be017de37cc3926`，name: "Anthropic Third-party API"
 - `hasCredentials: true`, authStyle: api_key
 - `liveProbe: "Live probe timed out after 15s"`
@@ -204,6 +216,7 @@ SDK 0.2.62 里根本没有这个变量，也没有 `withoutHostManagedProviderVa
 ### 改动 1（核心）：凭据探测识别 `~/.claude/settings.json`
 
 **新建** `src/lib/claude-settings.ts`：
+
 ```ts
 /**
  * Read Anthropic credentials from ~/.claude/settings.json (or legacy claude.json).
@@ -220,6 +233,7 @@ export function readClaudeSettingsCredentials(): ClaudeSettingsCredentials | nul
 ```
 
 **改动点：**
+
 - `src/lib/runtime/registry.ts hasCredentialsForRequest()`：在现有检查开头加入 settings.json 读取
 - `src/lib/provider-resolver.ts buildResolution()` env-mode 分支：`envHasCredentials` 加入 settings.json 作为来源，`settingSources` 保持 `['user','project','local']`
 
@@ -232,6 +246,7 @@ export function readClaudeSettingsCredentials(): ClaudeSettingsCredentials | nul
 ### 改动 3（UX）：改进错误消息
 
 `src/lib/ai-provider.ts:66` 当 `~/.claude/settings.json` 存在凭据但 native runtime 被显式选择时，抛出更具体的错误：
+
 ```
 "~/.claude/settings.json has credentials but Native runtime cannot read them.
 Switch to Claude Code SDK runtime in Settings, or add the provider to CodePilot directly."
@@ -240,6 +255,7 @@ Switch to Claude Code SDK runtime in Settings, or add the provider to CodePilot 
 ### 改动 4（回归测试）
 
 `src/__tests__/unit/claude-settings-credentials.test.ts`：
+
 - `settings.json` 含 `env.ANTHROPIC_AUTH_TOKEN` → `hasCredentialsForRequest()` 返回 true
 - `settings.json` 不存在 → 返回 false（不抛错）
 - `settings.json` 是 malformed JSON → 返回 false（不抛错）
@@ -254,6 +270,7 @@ Switch to Claude Code SDK runtime in Settings, or add the provider to CodePilot 
 **前置：** 清空 CodePilot 的所有 provider + 清空 shell env 的 `ANTHROPIC_*`。
 
 **复现步骤（修复前应失败）：**
+
 1. 安装 cc-switch，配一个第三方 Claude 中转（如 PackyCode / AICodeMirror）
 2. cc-switch 切换到该 provider，确认 `~/.claude/settings.json` 写入
 3. 终端跑 `claude`，确认能用（发一句 "who are you"）
@@ -270,6 +287,7 @@ npm run test  # 覆盖新增单测
 ### Sentry 跟踪
 
 修复发布后 72h 观察：
+
 - `No provider credentials available` 指纹 daily count 应下降
 - 不会出现新增的"cc-switch 相关"指纹
 
@@ -289,7 +307,7 @@ npm run test  # 覆盖新增单测
 - **2026-04-15 第二轮 review 推翻首轮补丁** — reviewer 正确指出代价评估错误：我原以为只失去 `~/.claude/CLAUDE.md` 和 hooks，实际 SDK 的多个用户级能力都依赖 `settingSources: ['user']` 自动发现（user-level MCP、plugins、hooks、CLAUDE.md），dropping 'user' 会让显式配 DB provider 的所有用户都丢这些能力。回退 settingSources 改动。
 - **2026-04-15 第三轮 review 提出"按 provider group 决定凭据归属"原则**：
   - env group（provider_id='env'）→ 完全尊重 Claude Code 自己的来源（settings.json + cc-switch）
-  - DB provider 显式选中 → auth/baseURL/model 必须仅以 DB provider 的配置为准；settings.json 的 ANTHROPIC_* 不得覆盖
+  - DB provider 显式选中 → auth/baseURL/model 必须仅以 DB provider 的配置为准；settings.json 的 ANTHROPIC\_\* 不得覆盖
   - **但** 要保留 user-level 非认证配置（MCP/plugins/hooks/CLAUDE.md）
   - auto/SDK/native 只决定 runtime 选择，不改变凭据归属语义
 - **最终方案（实施）：per-request shadow `~/.claude/`**

@@ -31,9 +31,9 @@
 
 证据：
 
-- [src/app/api/skills/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/route.ts#L320)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L483)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L551)
+- [src/app/api/skills/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/route.ts#L320)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L483)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L551)
 
 当前实现：
 
@@ -60,9 +60,9 @@
 
 证据：
 
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L685)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L711)
-- [src/lib/provider-resolver.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/provider-resolver.ts#L488)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L685)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L711)
+- [src/lib/provider-resolver.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/provider-resolver.ts#L488)
 
 当前实现：
 
@@ -91,12 +91,12 @@
 
 证据：
 
-- [src/app/api/skills/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/route.ts#L323)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L551)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L689)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L711)
-- [src/app/api/skills/[name]/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/%5Bname%5D/route.ts#L154)
-- [src/app/api/skills/[name]/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/%5Bname%5D/route.ts#L267)
+- [src/app/api/skills/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/route.ts#L323)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L551)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L689)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L711)
+- [src/app/api/skills/[name]/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/%5Bname%5D/route.ts#L154)
+- [src/app/api/skills/[name]/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/%5Bname%5D/route.ts#L267)
 
 当前实现：
 
@@ -116,8 +116,8 @@
 
 证据：
 
-- [src/components/chat/ChatView.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/ChatView.tsx#L532)
-- [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L718)
+- [src/components/chat/ChatView.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/ChatView.tsx#L532)
+- [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx#L718)
 
 `ChatView.sendMessage()` 会把传入的 `content` 直接 optimistic render 成用户消息。  
 而 skill / command 提交时传进去的就是展开后的 `finalPrompt`，不是“已选 Agent Skill”或“/command + 参数”的结构化调用信息。
@@ -128,10 +128,10 @@
 
 证据：
 
-- [src/lib/agent-sdk-capabilities.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/agent-sdk-capabilities.ts#L100)
-- [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L797)
-- [src/types/index.ts](/Users/op7418/Documents/code/opus-4.6-test/src/types/index.ts#L389)
-- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/op7418/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L1798)
+- [src/lib/agent-sdk-capabilities.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/agent-sdk-capabilities.ts#L100)
+- [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L797)
+- [src/types/index.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/types/index.ts#L389)
+- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/erbanku/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L1798)
 
 SDK 在 `system:init` 和 `supportedCommands()` 里都能返回当前会话的 commands / skills 信息。  
 但项目目前的处理是：
@@ -149,8 +149,8 @@ SDK 在 `system:init` 和 `supportedCommands()` 里都能返回当前会话的 c
 
 证据：
 
-- [src/app/api/skills/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/route.ts#L320)
-- [src/lib/provider-resolver.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/provider-resolver.ts#L488)
+- [src/app/api/skills/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/route.ts#L320)
+- [src/lib/provider-resolver.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/provider-resolver.ts#L488)
 
 当前前端列表会直接扫描：
 
@@ -174,9 +174,9 @@ SDK 在 `system:init` 和 `supportedCommands()` 里都能返回当前会话的 c
 
 证据：
 
-- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/op7418/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L33)
-- [src/lib/agent-sdk-agents.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/agent-sdk-agents.ts#L1)
-- [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L414)
+- [node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts](/Users/erbanku/Documents/code/opus-4.6-test/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts#L33)
+- [src/lib/agent-sdk-agents.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/agent-sdk-agents.ts#L1)
+- [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts#L414)
 
 SDK 的 `AgentDefinition` 原生支持：
 
@@ -191,14 +191,14 @@ SDK 的 `AgentDefinition` 原生支持：
 
 ## 项目当前实现 vs Agent SDK 原生语义
 
-| 维度 | 当前项目 | Claude Agent SDK / Claude Code |
-|---|---|---|
-| Agent Skills (`.claude/skills`) | 扫描后把 `SKILL.md` 展开成用户 prompt | SDK 从 filesystem 加载，Claude 自主决定是否使用 |
-| Slash Commands (`.claude/commands`) | 也混在同一列表里，且可能被展开或丢失 `/command` | 用户显式发送 `/command ...`，Claude Code 解析执行 |
-| UI 数据模型 | 两套机制混成一个“Skills” | Skills 和 Commands 是不同概念 |
-| 列表来源 | 手工扫文件 + 缓存 commands | SDK session 自身可报告当前支持的 commands / skills |
-| `~/.claude/skills` 加载 | UI 扫到就显示 | 需要 `settingSources` 包含 `user` |
-| `~/.agents/skills` | 当成 installed skills 暴露给 UI | 官方 Skills 文档未见该标准路径 |
+| 维度                                | 当前项目                                        | Claude Agent SDK / Claude Code                     |
+| ----------------------------------- | ----------------------------------------------- | -------------------------------------------------- |
+| Agent Skills (`.claude/skills`)     | 扫描后把 `SKILL.md` 展开成用户 prompt           | SDK 从 filesystem 加载，Claude 自主决定是否使用    |
+| Slash Commands (`.claude/commands`) | 也混在同一列表里，且可能被展开或丢失 `/command` | 用户显式发送 `/command ...`，Claude Code 解析执行  |
+| UI 数据模型                         | 两套机制混成一个“Skills”                        | Skills 和 Commands 是不同概念                      |
+| 列表来源                            | 手工扫文件 + 缓存 commands                      | SDK session 自身可报告当前支持的 commands / skills |
+| `~/.claude/skills` 加载             | UI 扫到就显示                                   | 需要 `settingSources` 包含 `user`                  |
+| `~/.agents/skills`                  | 当成 installed skills 暴露给 UI                 | 官方 Skills 文档未见该标准路径                     |
 
 ## 为什么现在效果会比 Claude Code 差
 
@@ -306,19 +306,19 @@ SDK 的 `AgentDefinition` 原生支持：
 
 建议先按下面顺序改：
 
-1. 改 [src/components/chat/MessageInput.tsx](/Users/op7418/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx)
+1. 改 [src/components/chat/MessageInput.tsx](/Users/erbanku/Documents/code/opus-4.6-test/src/components/chat/MessageInput.tsx)
    - 先区分 `agent_skill`、`filesystem_slash_command`、`sdk_slash_command`。
    - slash command 选择后，提交 `/command` 本体。
    - Agent Skill 不再请求详情并展开正文。
-2. 改 [src/app/api/skills/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/route.ts)
+2. 改 [src/app/api/skills/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/route.ts)
    - 列表返回明确的 `kind/source`，区分 Agent Skill、Slash Command、SDK command。
-3. 改 [src/app/api/skills/[name]/route.ts](/Users/op7418/Documents/code/opus-4.6-test/src/app/api/skills/%5Bname%5D/route.ts)
+3. 改 [src/app/api/skills/[name]/route.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/app/api/skills/%5Bname%5D/route.ts)
    - 只为“真的需要查看文件正文”的条目提供详情；SDK command 和 Agent Skill 都不应依赖这里展开执行。
-4. 改 [src/lib/claude-client.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/claude-client.ts)
+4. 改 [src/lib/claude-client.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/claude-client.ts)
    - 转发 `system:init` 的 commands/skills 元数据。
-5. 改 [src/lib/provider-resolver.ts](/Users/op7418/Documents/code/opus-4.6-test/src/lib/provider-resolver.ts)
+5. 改 [src/lib/provider-resolver.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/lib/provider-resolver.ts)
    - 结合官方 Skills 文档重新审视 `settingSources`，不要把 user-level Agent Skills 扫出来但又不加载到 SDK session。
-6. 改 [src/types/index.ts](/Users/op7418/Documents/code/opus-4.6-test/src/types/index.ts) 和 [src/hooks/useSSEStream.ts](/Users/op7418/Documents/code/opus-4.6-test/src/hooks/useSSEStream.ts)
+6. 改 [src/types/index.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/types/index.ts) 和 [src/hooks/useSSEStream.ts](/Users/erbanku/Documents/code/opus-4.6-test/src/hooks/useSSEStream.ts)
    - 增加对应 SSE event/type。
 7. 补测试
    - “选中 Agent Skill”不再把 `SKILL.md` 文本显示进聊天窗口。

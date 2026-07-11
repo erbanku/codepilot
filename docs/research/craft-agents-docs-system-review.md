@@ -1,7 +1,7 @@
 # Craft Agents 文档体系对标调研
 
 > 调研日期：2026-04-16
-> 对标仓库：`/Users/op7418/Documents/code/资料/craft-agents-oss-main`（craft-agents-oss，Apache-2.0，Electron + Bun monorepo）
+> 对标仓库：`/Users/erbanku/Documents/code/资料/craft-agents-oss-main`（craft-agents-oss，Apache-2.0，Electron + Bun monorepo）
 > 目的：考察一个同品类开源项目（Agent 桌面客户端）如何组织文档，产出 CodePilot 文档体系可借鉴的具体动作清单。
 > 三层结构：**[craft 事实]** 带 `file:line`；**[CodePilot 事实]** 带仓库内路径；**[推断]** 标注。
 >
@@ -14,6 +14,7 @@
 CodePilot 已经形成相对完整的内部文档链（`exec-plans/` + `research/` + `handover/` + `insights/`），但面向**外部用户与社区贡献者**的文档尚薄弱（无 Issue 模板、无 PR 模板、README 未嵌入项目结构图）。本次对标选 craft-agents-oss，因为它与 CodePilot 定位几乎重合（Electron Agent 客户端 + CLI + 远程服务端），但走的是公开开源路线，面向外部读者的治理文档更完整。
 
 对标目标：
+
 1. 抽出 craft 做得好而 CodePilot 缺失的"外部入口"文档形态。
 2. 确认 CodePilot 现有"内部研发"文档链是否真的更强（避免反向学习）。
 3. 产出可执行的借鉴清单。
@@ -24,16 +25,16 @@ CodePilot 已经形成相对完整的内部文档链（`exec-plans/` + `research
 
 ### 2.1 顶层文件清单
 
-| 文件 | 行数 | 职责 |
-|------|------|------|
-| `README.md` | 635 | 用户旅程型总览：Why → Install → Quick Start → Features → Troubleshooting → License |
-| `CONTRIBUTING.md` | 121 | 分支命名规范 + PR 内容要求 |
-| `SECURITY.md` | 58 | 漏洞上报流程 |
-| `CODE_OF_CONDUCT.md` | 26 | 社区行为准则 |
-| `TRADEMARK.md` | 100 | 品牌与商标使用规则（fork 约束） |
-| `NOTICE` | 15 | 第三方许可声明 |
-| `LICENSE` | 191 | Apache-2.0 完整文本（先前版本误把字节数 10770 当作行数） |
-| `docs/cli.md` | 240 | CLI 命令完整参考 |
+| 文件                 | 行数 | 职责                                                                               |
+| -------------------- | ---- | ---------------------------------------------------------------------------------- |
+| `README.md`          | 635  | 用户旅程型总览：Why → Install → Quick Start → Features → Troubleshooting → License |
+| `CONTRIBUTING.md`    | 121  | 分支命名规范 + PR 内容要求                                                         |
+| `SECURITY.md`        | 58   | 漏洞上报流程                                                                       |
+| `CODE_OF_CONDUCT.md` | 26   | 社区行为准则                                                                       |
+| `TRADEMARK.md`       | 100  | 品牌与商标使用规则（fork 约束）                                                    |
+| `NOTICE`             | 15   | 第三方许可声明                                                                     |
+| `LICENSE`            | 191  | Apache-2.0 完整文本（先前版本误把字节数 10770 当作行数）                           |
+| `docs/cli.md`        | 240  | CLI 命令完整参考                                                                   |
 
 ### 2.2 README 的用户旅程型结构
 
@@ -65,16 +66,16 @@ docs/
 
 ### 2.4 子项目 README 分布极不均衡
 
-| 路径 | README 长度 | 说明 |
-|------|------------|------|
-| `apps/electron/README.md` | 291 行 | **最详尽**：架构树、构建流程、"Key Learnings & Gotchas" |
-| `apps/cli/` | — | 无独立 README，文档外移到 `docs/cli.md` |
-| `apps/viewer/` | — | 无 README |
-| `apps/webui/` | — | 无 README |
-| `packages/core/README.md` | 100 行 | 导出类型清单，无使用示例 |
-| `packages/server-core/README.md` | 18 行 | 仅写明"out of scope"，对集成者无效 |
-| `packages/shared/` | — | 无 README |
-| `packages/server/` | — | 无 README |
+| 路径                             | README 长度 | 说明                                                    |
+| -------------------------------- | ----------- | ------------------------------------------------------- |
+| `apps/electron/README.md`        | 291 行      | **最详尽**：架构树、构建流程、"Key Learnings & Gotchas" |
+| `apps/cli/`                      | —           | 无独立 README，文档外移到 `docs/cli.md`                 |
+| `apps/viewer/`                   | —           | 无 README                                               |
+| `apps/webui/`                    | —           | 无 README                                               |
+| `packages/core/README.md`        | 100 行      | 导出类型清单，无使用示例                                |
+| `packages/server-core/README.md` | 18 行       | 仅写明"out of scope"，对集成者无效                      |
+| `packages/shared/`               | —           | 无 README                                               |
+| `packages/server/`               | —           | 无 README                                               |
 
 [推断] craft 对"用户面向的子项目"（如 electron app）文档厚重，对"内部库"（shared / server / webui）直接省略。属于**选择性投入**，不是全面覆盖。
 
@@ -147,6 +148,7 @@ docs/
 ```
 
 根目录重要文件：
+
 - `README.md`、`ARCHITECTURE.md`、`CLAUDE.md`（AI 开发规范与流程纪律）、`RELEASE_NOTES.md`（版本发布必须遵循的严格模板，见 `CLAUDE.md` "发版"章节）。
 
 `.github/` 目录（已验证）：
@@ -182,23 +184,23 @@ CodePilot 此侧明显弱于 craft：
 
 ### 4.1 craft 强于 CodePilot（应借鉴）
 
-| 维度 | craft 做法 | CodePilot 现状 |
-|------|-----------|---------------|
-| YAML Issue 模板 | `.github/ISSUE_TEMPLATE/*.yml` 强制收集版本 / OS / Provider / 日志 | 无 |
-| 社区治理文件 | `CONTRIBUTING` / `SECURITY` / `CODE_OF_CONDUCT` / `TRADEMARK` | 全部缺失 |
-| README 嵌入架构树 | `README.md:345-365` 一段 ASCII 树搞定"项目是什么" | [推断] 需核验 |
-| 关键子模块"Gotchas"段 | `apps/electron/README.md:49-125` 高浓度坑点速查 | 分散在 `handover/` 中，无快速入口 |
-| CLI 独立参考文档 | `docs/cli.md` 240 行按动词分类 | [推断] 需核验是否已有对应文档 |
+| 维度                  | craft 做法                                                         | CodePilot 现状                    |
+| --------------------- | ------------------------------------------------------------------ | --------------------------------- |
+| YAML Issue 模板       | `.github/ISSUE_TEMPLATE/*.yml` 强制收集版本 / OS / Provider / 日志 | 无                                |
+| 社区治理文件          | `CONTRIBUTING` / `SECURITY` / `CODE_OF_CONDUCT` / `TRADEMARK`      | 全部缺失                          |
+| README 嵌入架构树     | `README.md:345-365` 一段 ASCII 树搞定"项目是什么"                  | [推断] 需核验                     |
+| 关键子模块"Gotchas"段 | `apps/electron/README.md:49-125` 高浓度坑点速查                    | 分散在 `handover/` 中，无快速入口 |
+| CLI 独立参考文档      | `docs/cli.md` 240 行按动词分类                                     | [推断] 需核验是否已有对应文档     |
 
 ### 4.2 CodePilot 强于 craft（应保持）
 
-| 维度 | CodePilot 做法 | craft 现状 |
-|------|---------------|-----------|
-| 执行计划体系 | `docs/exec-plans/{active,completed}` + tech-debt-tracker | 无 |
-| 调研文档三层纪律 | 已有 26 份，外部事实钉 URL + 仓库事实钉 file:line + 推断分层 | 无调研文档 |
-| 技术交接 ↔ 产品思考互链 | `handover/` 与 `insights/` 强制反向链接 | 无 |
-| AI 开发纪律 | `CLAUDE.md` 改动自查 + 发版模板 + Worktree 规则 | 无 AI 场景规则 |
-| Release Notes 严格模板 | `CLAUDE.md` 明确规定正文结构、下载链接、用户可读语言 | 仅依赖 GitHub Release，格式自由 |
+| 维度                    | CodePilot 做法                                               | craft 现状                      |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------- |
+| 执行计划体系            | `docs/exec-plans/{active,completed}` + tech-debt-tracker     | 无                              |
+| 调研文档三层纪律        | 已有 26 份，外部事实钉 URL + 仓库事实钉 file:line + 推断分层 | 无调研文档                      |
+| 技术交接 ↔ 产品思考互链 | `handover/` 与 `insights/` 强制反向链接                      | 无                              |
+| AI 开发纪律             | `CLAUDE.md` 改动自查 + 发版模板 + Worktree 规则              | 无 AI 场景规则                  |
+| Release Notes 严格模板  | `CLAUDE.md` 明确规定正文结构、下载链接、用户可读语言         | 仅依赖 GitHub Release，格式自由 |
 
 **结论**：CodePilot 的"内功"文档链（研发过程沉淀）已显著强于 craft，**不需要向 craft 反向学习**。
 
@@ -231,6 +233,7 @@ CodePilot 此侧明显弱于 craft：
 ### 5.3 P2 — 运营性文档补全（ROI 评估修订）
 
 [修订] Codex review 后确认：`CODE_OF_CONDUCT.md` 与 `TRADEMARK.md` 在当前阶段 ROI 偏低，**暂不列入 P0**，待真正进入多方社区协作阶段（外部 PR 增多、品牌被 fork 滥用等）再补。P0 最高 ROI 聚焦在：
+
 - 结构化 `bug_report.yml` 强制收集版本 / OS / Provider / 日志；
 - `pull_request_template.md` 复用现有 `CLAUDE.md` 改动自查五条，**以链接方式引用而非复制**，避免维护两份。
 

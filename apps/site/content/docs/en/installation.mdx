@@ -14,12 +14,12 @@ description: How to install and set up CodePilot on your system.
 
 <DownloadButton label="Download Latest Release" />
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/op7418/CodePilot/releases).
+Download the latest release for your platform from [GitHub Releases](https://github.com/erbanku/CodePilot/releases).
 
-| Platform | Format | Architecture |
-|----------|--------|-------------|
-| macOS | DMG | arm64 (Apple Silicon) + x64 (Intel) |
-| Windows | NSIS Installer | x64 |
+| Platform | Format         | Architecture                        |
+| -------- | -------------- | ----------------------------------- |
+| macOS    | DMG            | arm64 (Apple Silicon) + x64 (Intel) |
+| Windows  | NSIS Installer | x64                                 |
 
 ## Installation Steps
 
@@ -92,12 +92,12 @@ When the Setup Center (or the connection status indicator) detects Claude Code, 
 2. **Other installations found** — each with its path and type
 3. **Uninstall commands** — specific to each installation type:
 
-| Installation Type | Uninstall Command |
-|---|---|
-| npm | `npm uninstall -g @anthropic-ai/claude-code` |
-| Bun | `bun remove -g @anthropic-ai/claude-code` |
-| Homebrew | `brew uninstall --cask claude-code` |
-| Native | Remove the binary at the displayed path |
+| Installation Type | Uninstall Command                            |
+| ----------------- | -------------------------------------------- |
+| npm               | `npm uninstall -g @anthropic-ai/claude-code` |
+| Bun               | `bun remove -g @anthropic-ai/claude-code`    |
+| Homebrew          | `brew uninstall --cask claude-code`          |
+| Native            | Remove the binary at the displayed path      |
 
 After removing the conflicting installations, click **Re-detect** to verify only one remains.
 

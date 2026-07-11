@@ -4,7 +4,7 @@
 > 最后更新：2026-04-12（final report updated after 21 commits）
 > 触发方式：schedule trigger @ 2026-04-12 08:00 CST，autonomous 执行
 > 对应调研：[docs/research/hermes-agent-analysis.md](../../research/hermes-agent-analysis.md) 的 §3.1 - §3.6
-> 隔离：worktree `/Users/op7418/Documents/code/opus-4.6-test-hermes-impl`，分支 `feat/hermes-inspired-runtime-upgrade`
+> 隔离：worktree `/Users/erbanku/Documents/code/opus-4.6-test-hermes-impl`，分支 `feat/hermes-inspired-runtime-upgrade`
 
 ## ⚠️ 执行规则（必读）
 
@@ -43,6 +43,7 @@
 ### 完成判定
 
 "整个计划完成" = 以下条件全部满足：
+
 1. §3.1 到 §3.6 的 6 个任务的状态都是 `done` 或 `blocked`
 2. 最后一次 `npm run test` 通过
 3. Status 表更新反映真实状态
@@ -56,15 +57,15 @@
 
 每完成一个任务或失败，立即更新这张表。
 
-| # | 任务 | 状态 | Commit | Notes |
-|---|------|------|--------|-------|
-| 3.1 | 并行安全调度器 | ✅ 已完成 | (本 commit) | 最小可行版：模块 + 测试全通过，未 wire 进 agent-tools.ts。AI SDK `tool({execute})` 没有 batch 级 hook，完整 wiring 需要独立 follow-up。详见 parallel-safety.ts 文件头。|
-| 3.2 | 辅助模型解析 | ✅ 已完成 | (本 commit) | 纯函数 `routeAuxiliaryModel` + 薄 wrapper `resolveAuxiliaryModel`；5 层解析链；never null 主模型兜底；20+ 测试全通过 |
-| 3.3 | 渐进子目录 hint | ✅ 已完成 | (本 commit) | 完整 port，包含自写 shell tokenizer；20+ 测试（含真实文件系统 fixture）全通过；集成到 agent-tools.ts 推后到独立 follow-up |
-| 3.4 | Session 历史搜索 | ✅ 已完成 | (本 commit) | `searchMessages` DB 函数 + `codepilot_session_search` 工具 + builtin-tools 注册；12 测试含真实 SQLite DB fixture 全通过；**已完整 wire up**（与 memory-search 平级） |
-| 3.5a | 长对话压缩 - 接线 + token 预算 | ✅ 已完成 | (本 commit) | **重定位**：发现宏观 LLM 压缩已 wire 在 chat/route.ts。新增 `pruneOldToolResultsByBudget` 作为可选升级模块；`shouldAutoCompact` 标记 `@deprecated` 指向 `needsCompression` |
-| 3.5b | 长对话压缩 - LLM 摘要 | ✅ 已完成 | (本 commit) | **重定位**：LLM 摘要已存在，改为升级 `context-compressor.ts` 使用 `resolveAuxiliaryModel('compact')` 的 5 层 fallback 链；939 测试无回归 |
-| 3.6 | Skill 自动创建 nudge | ✅ 已完成 | (本 commit) | 纯函数 `shouldSuggestSkill` + `buildSkillNudgePayload` + agent-loop.ts wire up。阈值：step≥8 且 distinctTools≥3。SSE 通过 `status` 事件 subtype=`skill_nudge` 发射。**已完整 wire up** |
+| #    | 任务                           | 状态      | Commit      | Notes                                                                                                                                                                                  |
+| ---- | ------------------------------ | --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.1  | 并行安全调度器                 | ✅ 已完成 | (本 commit) | 最小可行版：模块 + 测试全通过，未 wire 进 agent-tools.ts。AI SDK `tool({execute})` 没有 batch 级 hook，完整 wiring 需要独立 follow-up。详见 parallel-safety.ts 文件头。                |
+| 3.2  | 辅助模型解析                   | ✅ 已完成 | (本 commit) | 纯函数 `routeAuxiliaryModel` + 薄 wrapper `resolveAuxiliaryModel`；5 层解析链；never null 主模型兜底；20+ 测试全通过                                                                   |
+| 3.3  | 渐进子目录 hint                | ✅ 已完成 | (本 commit) | 完整 port，包含自写 shell tokenizer；20+ 测试（含真实文件系统 fixture）全通过；集成到 agent-tools.ts 推后到独立 follow-up                                                              |
+| 3.4  | Session 历史搜索               | ✅ 已完成 | (本 commit) | `searchMessages` DB 函数 + `codepilot_session_search` 工具 + builtin-tools 注册；12 测试含真实 SQLite DB fixture 全通过；**已完整 wire up**（与 memory-search 平级）                   |
+| 3.5a | 长对话压缩 - 接线 + token 预算 | ✅ 已完成 | (本 commit) | **重定位**：发现宏观 LLM 压缩已 wire 在 chat/route.ts。新增 `pruneOldToolResultsByBudget` 作为可选升级模块；`shouldAutoCompact` 标记 `@deprecated` 指向 `needsCompression`             |
+| 3.5b | 长对话压缩 - LLM 摘要          | ✅ 已完成 | (本 commit) | **重定位**：LLM 摘要已存在，改为升级 `context-compressor.ts` 使用 `resolveAuxiliaryModel('compact')` 的 5 层 fallback 链；939 测试无回归                                               |
+| 3.6  | Skill 自动创建 nudge           | ✅ 已完成 | (本 commit) | 纯函数 `shouldSuggestSkill` + `buildSkillNudgePayload` + agent-loop.ts wire up。阈值：step≥8 且 distinctTools≥3。SSE 通过 `status` 事件 subtype=`skill_nudge` 发射。**已完整 wire up** |
 
 **状态符号**：📋 待开始 / 🔄 进行中 / ✅ 已完成 / ⏸ blocked / ❌ 放弃
 
@@ -103,34 +104,39 @@
 ## 参考资料（快速链接）
 
 - **对比调研**：[docs/research/hermes-agent-analysis.md](../../research/hermes-agent-analysis.md)
-- **Hermes 本地副本**：`/Users/op7418/Documents/code/资料/hermes-agent-main/`（非 git 仓库，v0.8.0 快照）
+- **Hermes 本地副本**：`/Users/erbanku/Documents/code/资料/hermes-agent-main/`（非 git 仓库，v0.8.0 快照）
 - **Native Runtime 交接文档（基线）**：[docs/handover/decouple-native-runtime.md](../../handover/decouple-native-runtime.md)
-- **CodePilot 项目根约定**：`/Users/op7418/Documents/code/opus-4.6-test-hermes-impl/CLAUDE.md`
+- **CodePilot 项目根约定**：`/Users/erbanku/Documents/code/opus-4.6-test-hermes-impl/CLAUDE.md`
 
 **关键上游源文件**（只读参考）：
-- Hermes 并行判定：`/Users/op7418/Documents/code/资料/hermes-agent-main/run_agent.py:213-336`
-- Hermes 辅助模型：`/Users/op7418/Documents/code/资料/hermes-agent-main/agent/auxiliary_client.py:1-60`
-- Hermes 子目录 hint：`/Users/op7418/Documents/code/资料/hermes-agent-main/agent/subdirectory_hints.py:1-139`
-- Hermes 上下文压缩：`/Users/op7418/Documents/code/资料/hermes-agent-main/agent/context_compressor.py:1-100`
+
+- Hermes 并行判定：`/Users/erbanku/Documents/code/资料/hermes-agent-main/run_agent.py:213-336`
+- Hermes 辅助模型：`/Users/erbanku/Documents/code/资料/hermes-agent-main/agent/auxiliary_client.py:1-60`
+- Hermes 子目录 hint：`/Users/erbanku/Documents/code/资料/hermes-agent-main/agent/subdirectory_hints.py:1-139`
+- Hermes 上下文压缩：`/Users/erbanku/Documents/code/资料/hermes-agent-main/agent/context_compressor.py:1-100`
 
 ---
 
 ## 任务 3.1 — 并行安全调度器
 
 ### 目标
+
 在 tool 包装层插入并行前安全判定。AI SDK 默认用 `Promise.all` 并行执行 tool calls，我们要保留这个并行能力，但对不安全的组合强制串行。
 
 ### 涉及文件
+
 - `src/lib/parallel-safety.ts` **新建**
 - `src/lib/agent-tools.ts` 修改（集成判定逻辑到 tool execute 包装）
 - `src/__tests__/unit/parallel-safety.test.ts` **新建**
 
 ### 参考
+
 - 对比调研：`docs/research/hermes-agent-analysis.md` §1.3、§3.1
 - 上游源：`run_agent.py:213-336`（四层判定完整实现）
 - CodePilot agent-loop：`src/lib/agent-loop.ts:225`、`:353-387`（for await fullStream 消费 tool events）
 
 ### Acceptance criteria
+
 - [ ] `PARALLEL_SAFE_TOOLS: Set<string>` — 至少包含 `Read`, `Glob`, `Grep`, `WebFetch`, `codepilot_memory_search`, `codepilot_memory_get`, `codepilot_memory_recent`
 - [ ] `PATH_SCOPED_TOOLS: Set<string>` — 至少包含 `Write`, `Edit`（如果有 FileEdit 也加上）
 - [ ] `NEVER_PARALLEL_TOOLS: Set<string>` — 任何需要用户交互的工具
@@ -175,14 +181,17 @@
 7. commit：`git add -A && git commit -m "feat(runtime): add parallel-safe tool execution gating"`
 
 ### 可能失败点 + fallback
+
 - **async-mutex 依赖不存在**：`grep -r 'async-mutex' package.json` 检查。不存在就用 Promise chain 自己实现一个 `class SimpleMutex { private p = Promise.resolve(); async lock<T>(fn: () => Promise<T>): Promise<T> { const next = this.p.then(fn); this.p = next.catch(() => {}); return next; } }`
 - **agent-tools.ts 结构复杂**：如果花 > 15 分钟还没找到集成点，走"最小可行版"——只提供判定函数 + 测试，集成点用 `// TODO: wire up via feature flag` 标注，commit，跳 3.2
 - **类型错误**：看现有 tool 定义是 `tool({ execute: ... })` 还是别的形态，照现有结构
 
 ### Commit message
+
 `feat(runtime): add parallel-safe tool execution gating`
 
 Body 内容：
+
 - 参考 hermes run_agent.py:213-336 的四层判定实现
 - 覆盖 read/write/bash 三类工具的并行安全策略
 - 不改变 AI SDK 默认并行行为，只在不安全组合时串行化
@@ -193,19 +202,23 @@ Body 内容：
 ## 任务 3.2 — 辅助模型解析 + sdkProxyOnly fallback
 
 ### 目标
+
 在 `provider-resolver.ts` 新增 `resolveAuxiliaryModel(task)` 函数，按 §3.2 的 5 步解析链返回 `{providerId, modelId}`，**永远不返回 null**（最后兜底到主 provider + 主模型）。
 
 ### 涉及文件
+
 - `src/lib/provider-resolver.ts` 修改（加新函数）
 - `src/__tests__/unit/provider-resolver.test.ts` 修改（加新测试）
 - 不改 call site（留给 3.5 接入）
 
 ### 参考
+
 - 对比调研：`docs/research/hermes-agent-analysis.md` §2.6、§2.7、§3.2
 - 上游源：`agent/auxiliary_client.py:1-43`（docstring 列出 7 档 fallback 链）
 - CodePilot 既有 roleModels：`src/lib/provider-catalog.ts:41, :73-75`、`provider-resolver.ts:262-278`
 
 ### Acceptance criteria
+
 - [ ] 函数签名：`resolveAuxiliaryModel(task: 'compact' | 'vision' | 'summarize' | 'web_extract'): { providerId: string; modelId: string }`
 - [ ] **永远不返回 null**——最坏情况下返回主 provider + 主模型
 - [ ] 解析链（从上到下）：
@@ -224,14 +237,17 @@ Body 内容：
 3. 定位主 provider 的获取 API（应该已有 `getActiveProvider()` / `resolveActiveProvider()` 类函数）
 4. 定位"列举所有已配置 provider"的 API（如果存在）
 5. 实现 `resolveAuxiliaryModel(task)`：
+
    ```ts
    export function resolveAuxiliaryModel(
-     task: 'compact' | 'vision' | 'summarize' | 'web_extract'
+     task: "compact" | "vision" | "summarize" | "web_extract",
    ): { providerId: string; modelId: string } {
      // 1. Per-task env override
-     const envProvider = process.env[`AUXILIARY_${task.toUpperCase()}_PROVIDER`];
+     const envProvider =
+       process.env[`AUXILIARY_${task.toUpperCase()}_PROVIDER`];
      const envModel = process.env[`AUXILIARY_${task.toUpperCase()}_MODEL`];
-     if (envProvider && envModel) return { providerId: envProvider, modelId: envModel };
+     if (envProvider && envModel)
+       return { providerId: envProvider, modelId: envModel };
 
      const main = resolveActiveProvider(); // 或现有同义函数
      // 2. Main provider's small slot
@@ -243,15 +259,20 @@ Body 内容：
        return { providerId: main.id, modelId: main.roleModels.haiku };
      }
      // 4. Other configured providers
-     const others = listConfiguredProviders().filter(p => p.id !== main.id && !p.sdkProxyOnly);
+     const others = listConfiguredProviders().filter(
+       (p) => p.id !== main.id && !p.sdkProxyOnly,
+     );
      for (const p of others) {
-       if (p.roleModels.small) return { providerId: p.id, modelId: p.roleModels.small };
-       if (p.roleModels.haiku) return { providerId: p.id, modelId: p.roleModels.haiku };
+       if (p.roleModels.small)
+         return { providerId: p.id, modelId: p.roleModels.small };
+       if (p.roleModels.haiku)
+         return { providerId: p.id, modelId: p.roleModels.haiku };
      }
      // 5. Ultimate floor: main + main model
      return { providerId: main.id, modelId: main.defaultModel };
    }
    ```
+
 6. 测试 case：
    - env 覆盖命中
    - 主 provider 有 small
@@ -261,11 +282,13 @@ Body 内容：
 7. `npm run test` + commit
 
 ### 可能失败点 + fallback
+
 - **"列举所有已配置 provider" API 不存在**：跳过第 4 步（fallback provider 扫描），直接退化到第 5 步 ultimate floor。注释里写 `// TODO: add cross-provider fallback when provider enumeration API is available`
 - **ResolvedProvider 没有 `defaultModel` 字段**：改用 `defaultModels[0].modelId` 或类似路径
 - **测试需要 mock 复杂的 DB state**：参考 `provider-resolver.test.ts` 现有 test 的 mock 模式，不要自己发明
 
 ### Commit message
+
 `feat(provider): add resolveAuxiliaryModel with sdkProxyOnly fallback`
 
 ---
@@ -273,18 +296,22 @@ Body 内容：
 ## 任务 3.3 — 渐进式子目录 hint 发现
 
 ### 目标
+
 Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据 args 中的路径上溯祖先目录寻找 `AGENTS.md` / `CLAUDE.md`，首次发现的内容追加到 tool result，不改 system prompt。
 
 ### 涉及文件
+
 - `src/lib/subdirectory-hint-tracker.ts` **新建**
 - `src/lib/agent-tools.ts` 修改（集成 tracker）
 - `src/__tests__/unit/subdirectory-hint-tracker.test.ts` **新建**
 
 ### 参考
+
 - 对比调研：`docs/research/hermes-agent-analysis.md` §1.5、§3.3
 - 上游源（**建议通读**）：`agent/subdirectory_hints.py:1-139`
 
 ### Acceptance criteria
+
 - [ ] `SubdirectoryHintTracker` class，构造函数接收 `workingDir: string`
 - [ ] `checkToolCall(toolName, args): string | null` 方法，返回要追加到 tool result 的 hint 文本
 - [ ] `PATH_ARG_KEYS = new Set(['path', 'file_path', 'workdir', 'cwd'])`
@@ -313,11 +340,13 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 7. `npm run test` + commit
 
 ### 可能失败点 + fallback
+
 - **Shell 命令路径提取过于复杂**：只处理 `PATH_ARG_KEYS` 的直接参数，跳过 Bash 的 command 解析。注释 `// TODO: enhance Bash path extraction`
 - **agent-tools.ts 集成点找不到**：跟 3.1 一样，fallback 为"只提供 tracker 类 + 测试，不集成"，加 feature flag env var
 - **tool result 类型是 object 不是 string**：只在 result 是字符串时追加，object result 跳过
 
 ### Commit message
+
 `feat(runtime): add progressive subdirectory hint discovery`
 
 ---
@@ -325,19 +354,23 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 ## 任务 3.4 — Session 历史搜索工具
 
 ### 目标
+
 新增 `codepilot_session_search` 内置工具，查询 SQLite `messages` 表做历史会话全文检索。复用 `codepilot_memory_search` 的工具壳。
 
 ### 涉及文件
+
 - `src/lib/builtin-tools/session-search.ts` **新建**
 - `src/lib/builtin-tools/` 里注册新工具的位置（参考 memory-search 怎么注册的）
 - `src/__tests__/unit/session-search.test.ts` **新建**
 
 ### 参考
+
 - 对比调研：`docs/research/hermes-agent-analysis.md` §3.4
 - 模板：`src/lib/builtin-tools/memory-search.ts:1-100`（完整模仿它的结构）
 - Schema：`docs/research/session-management-and-context-compaction.md:29-40`（messages 表字段）
 
 ### Acceptance criteria
+
 - [ ] 工具名：`codepilot_session_search`
 - [ ] Zod schema：`query: string`, `sessionId?: string`, `limit?: number`（默认 5）
 - [ ] 查询 `messages` 表，用 `content LIKE '%' || query || '%'`（**不要**用 FTS5，保持最简）
@@ -359,11 +392,13 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 8. commit
 
 ### 可能失败点 + fallback
+
 - **messages 表 schema 和我预期的不同**：直接读 `src/lib/db.ts` 里的 CREATE TABLE 语句，用真实字段
 - **content 字段是 JSON blob（content blocks）不是纯文本**：在 LIKE 前先对 query 做 JSON escape，或者用 JSON_EXTRACT (SQLite) 提取 text
 - **注册机制不清晰**：至少新建独立的 `createSessionSearchTools(db)` 函数，导出但暂不 wire up，加 `// TODO: register in builtin-tools index`
 
 ### Commit message
+
 `feat(tools): add codepilot_session_search builtin tool`
 
 ---
@@ -371,18 +406,22 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 ## 任务 3.5a — 长对话压缩：接线 + token 预算裁剪
 
 ### 目标
+
 把 `shouldAutoCompact` 接到 `agent-loop.ts:225` 的 while 循环里，并增强 `pruneOldToolResults`：从固定 6 轮窗口改为 token 预算驱动，保留 tool-call summary 而非只有 marker，保护前 3 条消息。
 
 ### 涉及文件
+
 - `src/lib/agent-loop.ts` 修改（while 循环加 autoCompact 检查）
 - `src/lib/context-pruner.ts` 修改（增强 pruner）
 - `src/__tests__/unit/context-pruner.test.ts` 修改或新建
 
 ### 参考
+
 - 对比调研：`docs/research/hermes-agent-analysis.md` §1.6、§2.2、§2.3、§3.5 步 1
 - 上游源：`agent/context_compressor.py:1-100`（结构化 5 步算法）
 
 ### Acceptance criteria
+
 - [ ] `agent-loop.ts:225` 的 while 循环进入后、调用 `streamText()` 之前检查 `shouldAutoCompact(messages, contextWindowTokens)`
 - [ ] 如果 true → 调用增强版 `pruneOldToolResults(messages, options)` 返回裁剪后的消息
 - [ ] `contextWindowTokens` 从当前 model config 读（如果读不到，用 200000 的保守默认）
@@ -422,11 +461,13 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 7. commit
 
 ### 可能失败点 + fallback
+
 - **`getModelContextWindow` 不存在**：grep 现有代码找类似的；没有就 hardcode 200000 常量
 - **`estimateTokens` 不够精确导致裁剪过多或过少**：保持现有的 char/3.5 估算，加个保底 `Math.max(cutoff, messages.length - RECENT_TURNS_TO_KEEP)` 避免裁剪太激进
 - **agent-loop.ts 修改引发大量测试失败**：检查是否是 mock state 问题，只回滚 agent-loop.ts 那部分改动，把 pruner 增强和测试留下 commit
 
 ### Commit message
+
 `feat(runtime): wire auto-compact with token-budget pruning`
 
 ---
@@ -434,16 +475,20 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 ## 任务 3.5b — 长对话压缩：LLM 摘要
 
 ### 目标
+
 在 3.5a 基础上，对被裁剪的中段消息调用辅助模型生成结构化摘要（Goal / Progress / Decisions / Files / Next Steps），失败时 fallback 到 3.5a 的纯裁剪版。
 
 ### 依赖
+
 - **必须 3.2 和 3.5a 都完成且测试通过**，否则跳过本任务（blocked）
 
 ### 涉及文件
+
 - `src/lib/context-pruner.ts` 修改（加 `compactWithLLM` 路径）
 - `src/__tests__/unit/context-pruner.test.ts` 修改
 
 ### Acceptance criteria
+
 - [ ] 新函数 `compactWithLLM(messages, options): Promise<ModelMessage[]>`
 - [ ] 内部调用 `resolveAuxiliaryModel('compact')`
 - [ ] 如果返回的是主 provider + 主模型（ultimate floor），跳过 LLM 调用，直接返回 3.5a 的纯裁剪版
@@ -463,11 +508,13 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 7. commit
 
 ### 可能失败点 + fallback
+
 - **AI SDK 的 generateText 调用方式不熟**：grep `generateText` 找现有用法参考
 - **prompt 模板不知道怎么写**：用简单模板："Summarize the following conversation in these sections: Goal, Progress, Decisions Made, Files Modified, Next Steps. Keep each section concise."
 - **如果 3.2 或 3.5a 状态是 blocked** → 本任务自动 blocked，跳过
 
 ### Commit message
+
 `feat(runtime): add LLM-driven context compaction with cooldown`
 
 ---
@@ -475,18 +522,22 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 ## 任务 3.6 — Skill 自动创建 nudge
 
 ### 目标
+
 在 agent loop 结束时根据任务复杂度（步数 + 独特工具数）判断是否值得作为 Skill 保存，超过阈值时通过 SSE 发送建议事件给前端。
 
 ### 涉及文件
+
 - `src/lib/skill-nudge.ts` **新建**（阈值逻辑 + nudge 文本）
 - `src/lib/agent-loop.ts` 修改（while 循环退出时调用）
 - `src/__tests__/unit/skill-nudge.test.ts` **新建**
 
 ### 参考
+
 - 对比调研：`docs/research/hermes-agent-analysis.md` §3.6
 - 现有 Skill 系统：`grep -r 'skill' src/lib/` 找注册机制
 
 ### Acceptance criteria
+
 - [ ] `shouldSuggestSkill(stats: { step: number; distinctTools: Set<string> }): boolean`
 - [ ] 阈值：`step >= 8 && distinctTools.size >= 3` → true
 - [ ] 返回的 nudge 文本鼓励用户保存为 Skill，给出一句话示例
@@ -505,10 +556,12 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 6. commit
 
 ### 可能失败点 + fallback
+
 - **SSE 机制太复杂**：跳过 SSE 发射，只在 console.log 写一条 `[skill-nudge]` 提示，保证函数和测试落地
 - **agent-loop.ts 太大改动激进**：只 commit `skill-nudge.ts` 模块和测试，不 wire up
 
 ### Commit message
+
 `feat(runtime): add skill auto-create nudge heuristic`
 
 ---
@@ -517,31 +570,39 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 
 1. 把 Status 表更新到最终状态
 2. 在本文件末尾追加 **Final Report** 段（在这里之后），格式：
+
    ```markdown
    ## Final Report — 2026-04-12 HH:MM
 
    ### 任务状态总结
+
    - 3.1: ✅/⏸/❌ — commit sha or blocked reason
    - 3.2: ...
    - (所有 7 个条目)
 
    ### Commit 列表
+
    `git log --oneline main..HEAD` 输出
 
    ### 测试结果
+
    最后一次 `npm run test` 输出摘要（通过数 / 失败数）
 
    ### 决策日志汇总
+
    所有"决策日志"段里记录的条目列表
 
    ### 未完成事项 / 已知问题
+
    任何遗留 TODO、blocker、需要人工决策的地方
 
    ### 建议下一步
+
    - Review 所有 commit: `git log main..feat/hermes-inspired-runtime-upgrade`
-   - Worktree 路径: /Users/op7418/Documents/code/opus-4.6-test-hermes-impl
+   - Worktree 路径: /Users/erbanku/Documents/code/opus-4.6-test-hermes-impl
    - 合并建议: （是否建议合并 / 先 review 哪些 commit）
    ```
+
 3. commit 这次文档更新：`git add -A && git commit -m "docs: finalize hermes-inspired-runtime-upgrade execution log"`
 4. **停止会话**，不做任何其他事
 
@@ -568,22 +629,22 @@ Port Hermes 的 `SubdirectoryHintTracker` 到 TS。在 tool call 完成后根据
 - **Codex round 1 完成**：2026-04-12 约 04:15 CST（3 个缺陷修复 + 8 个回归测试）
 - **Codex round 2 完成**：2026-04-12 约 05:00 CST（收紧 Fix 1 + Fix 2 回归断言）
 - **功能扩展完成**：2026-04-12 约 14:40 CST（10 commits — 压缩通知、AskUserQuestion、Skill Nudge UI、i18n、bridge 守卫、SSE 测试、UI 修复）
-- **执行环境**：本地 worktree `/Users/op7418/Documents/code/opus-4.6-test-hermes-impl`，分支 `feat/hermes-inspired-runtime-upgrade`
+- **执行环境**：本地 worktree `/Users/erbanku/Documents/code/opus-4.6-test-hermes-impl`，分支 `feat/hermes-inspired-runtime-upgrade`
 - **Git 纪律遵守情况**：✅ 无 push / tag / PR / 合并到主分支；所有改动仅在 worktree 内
 - **最终测试结果**：`npm run test` — **939 passing, 0 failing**（从基线 844 增加到 939，新增 95 个测试用例）
 - **累计改动**：32 files changed, 4281 insertions(+), 27 deletions(-)
 
 ### 任务状态总结
 
-| # | 任务 | 状态 | Commit | 类型 |
-|---|------|------|--------|------|
-| 3.1 | 并行安全调度器 | ✅ 已完成 | `28853ac` | 模块 + 测试（无 wire） |
-| 3.2 | 辅助模型解析 + sdkProxyOnly fallback | ✅ 已完成 | `e51c9d5` | 模块 + 测试（等待 3.5b 消费） |
-| 3.3 | 渐进式子目录 hint 发现 | ✅ 已完成 | `8e36d49` | 模块 + 测试（无 wire） |
-| 3.4 | codepilot_session_search 内置工具 | ✅ 已完成 | `c567534` | **完整 wire up** |
-| 3.5a | 长对话压缩 - token 预算裁剪 | ✅ 已完成 | `1b1a6a4` | 模块升级 + deprecated 标记 |
-| 3.5b | 长对话压缩 - LLM 摘要 | ✅ 已完成 | `f125e0e` | **重定位并 wire up**（升级现有 context-compressor） |
-| 3.6 | Skill 自动创建 nudge | ✅ 已完成 | `5d50e03` | **完整 wire up** |
+| #    | 任务                                 | 状态      | Commit    | 类型                                                |
+| ---- | ------------------------------------ | --------- | --------- | --------------------------------------------------- |
+| 3.1  | 并行安全调度器                       | ✅ 已完成 | `28853ac` | 模块 + 测试（无 wire）                              |
+| 3.2  | 辅助模型解析 + sdkProxyOnly fallback | ✅ 已完成 | `e51c9d5` | 模块 + 测试（等待 3.5b 消费）                       |
+| 3.3  | 渐进式子目录 hint 发现               | ✅ 已完成 | `8e36d49` | 模块 + 测试（无 wire）                              |
+| 3.4  | codepilot_session_search 内置工具    | ✅ 已完成 | `c567534` | **完整 wire up**                                    |
+| 3.5a | 长对话压缩 - token 预算裁剪          | ✅ 已完成 | `1b1a6a4` | 模块升级 + deprecated 标记                          |
+| 3.5b | 长对话压缩 - LLM 摘要                | ✅ 已完成 | `f125e0e` | **重定位并 wire up**（升级现有 context-compressor） |
+| 3.6  | Skill 自动创建 nudge                 | ✅ 已完成 | `5d50e03` | **完整 wire up**                                    |
 
 **7/7 原计划任务 done，0 blocked，0 skipped** + **12 项超计划额外交付**（详见下方）
 
@@ -616,6 +677,7 @@ e51c9d5 feat(provider): add resolveAuxiliaryModel with sdkProxyOnly fallback
 ### 测试结果
 
 **最后一次 `npm run test` 输出摘要**（含全部 21 commits 后）：
+
 ```
 # tests 939
 # pass 939
@@ -625,6 +687,7 @@ e51c9d5 feat(provider): add resolveAuxiliaryModel with sdkProxyOnly fallback
 ```
 
 **新增测试覆盖**：
+
 - parallel-safety.test.ts：40+ 用例（4 层判定、destructive 命令、路径 overlap、路径提取）
 - provider-resolver.test.ts（追加）：20+ 用例（5 层解析链 + env override + 任务独立性 + 现场 smoke + computeEffectiveRoleModels 5 分支单元测）
 - subdirectory-hint-tracker.test.ts：25+ 用例（祖先上溯、路径键、Bash 提取、截断、优先级）
@@ -648,20 +711,20 @@ e51c9d5 feat(provider): add resolveAuxiliaryModel with sdkProxyOnly fallback
 
 以下交付物不在原 §3.1-§3.6 计划范围内，是在 Codex review、手动测试和功能打通过程中自然产出的：
 
-| # | 交付物 | Commit | 说明 |
-|---|--------|--------|------|
-| E1 | 人类可读压缩通知 | `80a7c64` | chat/route.ts 的 `context_compressed` 从机器字符串升级为 `"Context compressed: N older messages summarized, ~X tokens saved"` + 结构化 stats |
-| E2 | AskUserQuestion 内置工具 | `80a7c64` | Native Runtime 缺少 SDK Runtime 的 AskUserQuestion 能力。新增 `builtin-tools/ask-user-question.ts`（Zod schema: 1-6 questions, 1-6 options, multiSelect）+ permission-checker ALWAYS_ASK_TOOLS + PermissionPrompt NEVER_AUTO_APPROVE |
-| E3 | Skill Nudge 前端 Banner | `364373d` | SSE `skill_nudge` 事件 → `useSSEStream.ts` onSkillNudge 回调 → `stream-session-manager.ts` window CustomEvent → `ChatView.tsx` 持久化 banner（"Save as Skill" 按钮 + dismiss） |
-| E4 | Skill Nudge i18n | `2308708` | `skillNudge.message` / `.saveButton` / `.savePrompt` 的 en + zh 翻译；banner 用前端模板替换 step/toolCount 而非后端英文字符串 |
-| E5 | context-compressed SSE 回归修复 | `24d96e5` | 80a7c64 改变 payload 形状后 `stream-session-manager.ts` 的旧 string check 不再命中 → 新增 `onContextCompressed` 专用回调恢复 ChatView hasSummary 翻转 |
-| E6 | AskUserQuestion bridge/IM 限制文档 | `023700a` | 在工具头部文档化 bridge session 无法使用 AskUserQuestion（permission broker 只支持 Allow/Deny，不支持 updatedInput） |
-| E7 | Bridge 交互式工具 deny guard | `8eaae7b` | `permission-broker.ts` 新增 `BRIDGE_UNSUPPORTED_INTERACTIVE_TOOLS`，在 full_access 自动批准之前拦截 AskUserQuestion，返回明确 deny 原因让模型 fallback 为纯文本提问 |
-| E8 | SSE 事件分发测试 | `8eaae7b` | 3 个 sse-stream.test.ts 用例锁定 onContextCompressed / onSkillNudge 回调分发契约 + 泄漏到 onStatus 的负例 |
-| E9 | Bridge deny guard 纯函数测试 | `c757a9b` | 提取 `isBridgeUnsupportedInteractiveTool()` 纯函数 + 5 个测试用例（覆盖 AskUserQuestion / 标准工具 / ExitPlanMode / codepilot_* / 未知工具） |
-| E10 | permission-registry timer.unref() | `c757a9b` | permission timeout timer 加 `.unref()` 防止 Node 进程在测试/关闭时挂起 |
-| E11 | AskUserQuestion 全部必答 UI 修复 | `35699a0` | PermissionPrompt 提交按钮从 `some()` 改为 `every()`，防止用户跳过问题提交空答案 |
-| E12 | Codex review round 2 断言收紧 | `be8b4cf` | Fix 1 测试重写为严格拒绝 pre-fix 会产出的 source 值；Fix 2 导出 `computeEffectiveRoleModels` 并直接单元测 5 个分支 |
+| #   | 交付物                             | Commit    | 说明                                                                                                                                                                                                                                 |
+| --- | ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| E1  | 人类可读压缩通知                   | `80a7c64` | chat/route.ts 的 `context_compressed` 从机器字符串升级为 `"Context compressed: N older messages summarized, ~X tokens saved"` + 结构化 stats                                                                                         |
+| E2  | AskUserQuestion 内置工具           | `80a7c64` | Native Runtime 缺少 SDK Runtime 的 AskUserQuestion 能力。新增 `builtin-tools/ask-user-question.ts`（Zod schema: 1-6 questions, 1-6 options, multiSelect）+ permission-checker ALWAYS_ASK_TOOLS + PermissionPrompt NEVER_AUTO_APPROVE |
+| E3  | Skill Nudge 前端 Banner            | `364373d` | SSE `skill_nudge` 事件 → `useSSEStream.ts` onSkillNudge 回调 → `stream-session-manager.ts` window CustomEvent → `ChatView.tsx` 持久化 banner（"Save as Skill" 按钮 + dismiss）                                                       |
+| E4  | Skill Nudge i18n                   | `2308708` | `skillNudge.message` / `.saveButton` / `.savePrompt` 的 en + zh 翻译；banner 用前端模板替换 step/toolCount 而非后端英文字符串                                                                                                        |
+| E5  | context-compressed SSE 回归修复    | `24d96e5` | 80a7c64 改变 payload 形状后 `stream-session-manager.ts` 的旧 string check 不再命中 → 新增 `onContextCompressed` 专用回调恢复 ChatView hasSummary 翻转                                                                                |
+| E6  | AskUserQuestion bridge/IM 限制文档 | `023700a` | 在工具头部文档化 bridge session 无法使用 AskUserQuestion（permission broker 只支持 Allow/Deny，不支持 updatedInput）                                                                                                                 |
+| E7  | Bridge 交互式工具 deny guard       | `8eaae7b` | `permission-broker.ts` 新增 `BRIDGE_UNSUPPORTED_INTERACTIVE_TOOLS`，在 full_access 自动批准之前拦截 AskUserQuestion，返回明确 deny 原因让模型 fallback 为纯文本提问                                                                  |
+| E8  | SSE 事件分发测试                   | `8eaae7b` | 3 个 sse-stream.test.ts 用例锁定 onContextCompressed / onSkillNudge 回调分发契约 + 泄漏到 onStatus 的负例                                                                                                                            |
+| E9  | Bridge deny guard 纯函数测试       | `c757a9b` | 提取 `isBridgeUnsupportedInteractiveTool()` 纯函数 + 5 个测试用例（覆盖 AskUserQuestion / 标准工具 / ExitPlanMode / codepilot\_\* / 未知工具）                                                                                       |
+| E10 | permission-registry timer.unref()  | `c757a9b` | permission timeout timer 加 `.unref()` 防止 Node 进程在测试/关闭时挂起                                                                                                                                                               |
+| E11 | AskUserQuestion 全部必答 UI 修复   | `35699a0` | PermissionPrompt 提交按钮从 `some()` 改为 `every()`，防止用户跳过问题提交空答案                                                                                                                                                      |
+| E12 | Codex review round 2 断言收紧      | `be8b4cf` | Fix 1 测试重写为严格拒绝 pre-fix 会产出的 source 值；Fix 2 导出 `computeEffectiveRoleModels` 并直接单元测 5 个分支                                                                                                                   |
 
 ### 未完成事项 / 已知问题
 
@@ -689,7 +752,7 @@ e51c9d5 feat(provider): add resolveAuxiliaryModel with sdkProxyOnly fallback
 
 1. **代码 review**：
    ```bash
-   cd /Users/op7418/Documents/code/opus-4.6-test-hermes-impl
+   cd /Users/erbanku/Documents/code/opus-4.6-test-hermes-impl
    git log --oneline main..HEAD    # 21 commits
    git diff --stat main..HEAD      # 32 files, +4281/-27
    ```
@@ -712,6 +775,6 @@ e51c9d5 feat(provider): add resolveAuxiliaryModel with sdkProxyOnly fallback
 ### 附：对原研究稿的修正建议
 
 执行过程中发现 `docs/research/hermes-agent-analysis.md` §2.3 关于 `shouldAutoCompact` 是死代码 → LLM 压缩未接线的判断不准。实际上 `context-compressor.ts` + chat/route.ts:273-341 已经完整实现了 LLM 压缩，`shouldAutoCompact` 只是遗留死代码。建议更新研究稿：
+
 - §2.3 改为 "CodePilot 有两层压缩：微观 per-step 的 `pruneOldToolResults`（context-pruner.ts）+ 宏观 per-chat-turn 的 `compressConversation`（context-compressor.ts，wire 在 chat/route.ts）"
 - §3.5 的 P2 优先级可以降低——大部分已经做完，只剩 auxiliary 模型切换一小步（已经在本次完成）
-

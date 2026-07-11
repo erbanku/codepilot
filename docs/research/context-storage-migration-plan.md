@@ -13,8 +13,8 @@
 
 参考实现（本机路径）：
 
-- `/Users/op7418/Documents/code/资料/craft-agents-oss`
-- `/Users/op7418/Documents/code/资料/opencode`
+- `/Users/erbanku/Documents/code/资料/craft-agents-oss`
+- `/Users/erbanku/Documents/code/资料/opencode`
 
 ## 2. 现状问题摘要
 
@@ -37,6 +37,7 @@
 ### 3.2 目标表结构（建议）
 
 1. `projects`
+
 - `id TEXT PRIMARY KEY`
 - `root_path TEXT NOT NULL UNIQUE`
 - `name TEXT NOT NULL DEFAULT ''`
@@ -44,6 +45,7 @@
 - `updated_at TEXT NOT NULL`
 
 2. `chat_sessions`（新增/调整字段）
+
 - `project_id TEXT NOT NULL`（FK -> `projects.id`）
 - `sdk_cwd TEXT NOT NULL DEFAULT ''`
 - `is_archived INTEGER NOT NULL DEFAULT 0`
@@ -52,6 +54,7 @@
 - `summary_updated_at TEXT`
 
 3. `messages`（保留主表，内容轻量化）
+
 - `id TEXT PRIMARY KEY`
 - `session_id TEXT NOT NULL`
 - `role TEXT NOT NULL`
@@ -60,6 +63,7 @@
 - `is_summary INTEGER NOT NULL DEFAULT 0`
 
 4. `message_parts`（新增）
+
 - `id TEXT PRIMARY KEY`
 - `message_id TEXT NOT NULL`
 - `session_id TEXT NOT NULL`
@@ -69,6 +73,7 @@
 - `created_at TEXT NOT NULL`
 
 5. `session_runtime_state`（新增）
+
 - `session_id TEXT PRIMARY KEY`
 - `is_processing INTEGER NOT NULL DEFAULT 0`
 - `processing_generation INTEGER NOT NULL DEFAULT 0`
@@ -102,6 +107,7 @@
 - 在更新 `working_directory` 路径时引入 `canUpdateSdkCwd` 逻辑
 
 交付标准：
+
 - 旧会话可正常读取
 - 新会话具备稳定 `sdk_cwd`
 
@@ -112,6 +118,7 @@
 - 附件、tool_use、tool_result 改为结构化 payload
 
 交付标准：
+
 - UI 展示不回归
 - tool 结果不再依赖文本解析
 
@@ -122,6 +129,7 @@
 - streaming 保存改为“可 flush 队列 + 原子提交”
 
 交付标准：
+
 - 进程重启后能恢复排队消息与审批提示
 
 ### Phase 3（中高风险，3~5 天）
@@ -131,6 +139,7 @@
 - 列表查询支持 active/archived 与 parent 维度
 
 交付标准：
+
 - 长会话上下文质量稳定
 - 会话组织能力可用
 

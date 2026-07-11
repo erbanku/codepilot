@@ -13,7 +13,7 @@
  * conversation **without modifying the system prompt** — this preserves
  * prompt caching, matching the upstream design in Hermes / Block goose.
  *
- * Ported from /Users/op7418/Documents/code/资料/hermes-agent-main/
+ * Ported from /Users/erbanku/Documents/code/资料/hermes-agent-main/
  * agent/subdirectory_hints.py (lines 1-224, v0.8.0 snapshot).
  *
  * Integration status: module-only. Wire-up point is in agent-tools.ts —
@@ -26,27 +26,27 @@
  * Reference: docs/research/hermes-agent-analysis.md §1.5, §3.3
  */
 
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+import fs from "fs";
+import path from "path";
+import os from "os";
 
 /** Filenames to look for in discovered subdirectories, in priority order. */
 const HINT_FILENAMES = [
-  'AGENTS.md',
-  'agents.md',
-  'CLAUDE.md',
-  'claude.md',
-  '.cursorrules',
+  "AGENTS.md",
+  "agents.md",
+  "CLAUDE.md",
+  "claude.md",
+  ".cursorrules",
 ] as const;
 
 /** Maximum characters per hint file before truncation. */
 const MAX_HINT_CHARS = 8_000;
 
 /** Tool argument keys that typically contain filesystem paths. */
-const PATH_ARG_KEYS = new Set<string>(['path', 'file_path', 'workdir', 'cwd']);
+const PATH_ARG_KEYS = new Set<string>(["path", "file_path", "workdir", "cwd"]);
 
 /** Tool names whose argument is a shell command string to be tokenized. */
-const COMMAND_TOOLS = new Set<string>(['Bash']);
+const COMMAND_TOOLS = new Set<string>(["Bash"]);
 
 /**
  * How many parent directories to walk up when looking for hints.
@@ -95,7 +95,10 @@ export class SubdirectoryHintTracker {
    * @returns Formatted hint text to append to the tool result, or null if
    *   no new directories were discovered or no hint files were found.
    */
-  checkToolCall(toolName: string, toolArgs: Record<string, unknown>): string | null {
+  checkToolCall(
+    toolName: string,
+    toolArgs: Record<string, unknown>,
+  ): string | null {
     const dirs = this.extractDirectories(toolName, toolArgs);
     if (dirs.length === 0) return null;
 
@@ -106,17 +109,20 @@ export class SubdirectoryHintTracker {
     }
 
     if (allHints.length === 0) return null;
-    return '\n\n' + allHints.join('\n\n');
+    return "\n\n" + allHints.join("\n\n");
   }
 
   /** Extract directory paths from tool call arguments. */
-  private extractDirectories(toolName: string, args: Record<string, unknown>): string[] {
+  private extractDirectories(
+    toolName: string,
+    args: Record<string, unknown>,
+  ): string[] {
     const candidates = new Set<string>();
 
     // 1. Direct path arguments.
     for (const key of PATH_ARG_KEYS) {
       const val = args[key];
-      if (typeof val === 'string' && val.trim() !== '') {
+      if (typeof val === "string" && val.trim() !== "") {
         this.addPathCandidate(val, candidates);
       }
     }
@@ -124,7 +130,7 @@ export class SubdirectoryHintTracker {
     // 2. Shell commands — extract path-like tokens.
     if (COMMAND_TOOLS.has(toolName)) {
       const cmd = args.command;
-      if (typeof cmd === 'string') {
+      if (typeof cmd === "string") {
         this.extractPathsFromCommand(cmd, candidates);
       }
     }
@@ -146,7 +152,7 @@ export class SubdirectoryHintTracker {
     try {
       // Expand leading ~ to home directory.
       let p = rawPath;
-      if (p.startsWith('~')) {
+      if (p.startsWith("~")) {
         p = path.join(os.homedir(), p.slice(1));
       }
 
@@ -219,7 +225,7 @@ export class SubdirectoryHintTracker {
       if (!this.isFile(hintPath)) continue;
 
       try {
-        let content = fs.readFileSync(hintPath, 'utf-8').trim();
+        let content = fs.readFileSync(hintPath, "utf-8").trim();
         if (!content) continue;
 
         if (content.length > MAX_HINT_CHARS) {
@@ -232,7 +238,7 @@ export class SubdirectoryHintTracker {
         if (hintPath.startsWith(this.workingDir + path.sep)) {
           relPath = path.relative(this.workingDir, hintPath);
         } else if (hintPath.startsWith(os.homedir() + path.sep)) {
-          relPath = '~/' + path.relative(os.homedir(), hintPath);
+          relPath = "~/" + path.relative(os.homedir(), hintPath);
         }
 
         foundHint = { relPath, content };
@@ -262,14 +268,14 @@ export class SubdirectoryHintTracker {
     const tokens = tokenizeShellCommand(cmd);
     for (const token of tokens) {
       // Skip flags.
-      if (token.startsWith('-')) continue;
+      if (token.startsWith("-")) continue;
       // Must look like a path (contains / or .).
-      if (!token.includes('/') && !token.includes('.')) continue;
+      if (!token.includes("/") && !token.includes(".")) continue;
       // Skip URLs / git SSH refs.
       if (
-        token.startsWith('http://') ||
-        token.startsWith('https://') ||
-        token.startsWith('git@')
+        token.startsWith("http://") ||
+        token.startsWith("https://") ||
+        token.startsWith("git@")
       ) {
         continue;
       }
@@ -294,7 +300,7 @@ export class SubdirectoryHintTracker {
  */
 export function tokenizeShellCommand(cmd: string): string[] {
   const tokens: string[] = [];
-  let current = '';
+  let current = "";
   let quote: '"' | "'" | null = null;
 
   for (let i = 0; i < cmd.length; i++) {
@@ -307,15 +313,15 @@ export function tokenizeShellCommand(cmd: string): string[] {
       }
     } else if (ch === '"' || ch === "'") {
       quote = ch as '"' | "'";
-    } else if (ch === ' ' || ch === '\t' || ch === '\n') {
-      if (current !== '') {
+    } else if (ch === " " || ch === "\t" || ch === "\n") {
+      if (current !== "") {
         tokens.push(current);
-        current = '';
+        current = "";
       }
     } else {
       current += ch;
     }
   }
-  if (current !== '') tokens.push(current);
+  if (current !== "") tokens.push(current);
   return tokens;
 }

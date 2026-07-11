@@ -10,11 +10,11 @@
 
 ## 下载 / 本地包路径
 
-| 平台 | 架构 | 包 | SHA-256 | 状态 |
-|------|------|----|---------|------|
-| macOS | Apple Silicon | `/Users/op7418/Documents/code/opus-4.6-test/.claude/worktrees/product-refactor-research/release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-arm64.dmg` | `7965d9f51df41814c86785d0a16cc64966f5a9dc1692f35e0c10ee684ed285a8` | 🚫 **已废弃 / 不分发**（0.53.0 旧版 + 6923f13 前过时构建，仅诊断样本；当时 codesign/hdiutil 通过不代表可发） |
-| macOS | Intel x64 | `/Users/op7418/Documents/code/opus-4.6-test/.claude/worktrees/product-refactor-research/release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-x64.dmg` | `be65141fd48643439f0d95a9cd94e56cd3e5fe2ed686cf91a8096d22bd351bd0` | 🚫 **已废弃 / 不分发**（0.53.0 旧版 + 6923f13 前过时构建，仅诊断样本；当时 codesign/hdiutil 通过不代表可发） |
-| Windows | x64 | 待 Windows 机器本地构建 | 待补 | ⏳ 不能在 Mac 上交叉构建可用包 |
+| 平台    | 架构          | 包                                                                                                                                                                 | SHA-256                                                            | 状态                                                                                                         |
+| ------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| macOS   | Apple Silicon | `/Users/erbanku/Documents/code/opus-4.6-test/.claude/worktrees/product-refactor-research/release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-arm64.dmg` | `7965d9f51df41814c86785d0a16cc64966f5a9dc1692f35e0c10ee684ed285a8` | 🚫 **已废弃 / 不分发**（0.53.0 旧版 + 6923f13 前过时构建，仅诊断样本；当时 codesign/hdiutil 通过不代表可发） |
+| macOS   | Intel x64     | `/Users/erbanku/Documents/code/opus-4.6-test/.claude/worktrees/product-refactor-research/release-preview-2026-05-31/CodePilot-0.53.0-preview-2026-05-31-x64.dmg`   | `be65141fd48643439f0d95a9cd94e56cd3e5fe2ed686cf91a8096d22bd351bd0` | 🚫 **已废弃 / 不分发**（0.53.0 旧版 + 6923f13 前过时构建，仅诊断样本；当时 codesign/hdiutil 通过不代表可发） |
+| Windows | x64           | 待 Windows 机器本地构建                                                                                                                                            | 待补                                                               | ⏳ 不能在 Mac 上交叉构建可用包                                                                               |
 
 说明：
 
@@ -55,11 +55,11 @@ Windows 验收必须在真机完成：
 
 请优先反馈 P0 / P1，视觉细节可以后置。
 
-| 级别 | 定义 | 示例 |
-|------|------|------|
-| P0 | 无法继续测试或可能损坏数据 | 无法安装 / 无法启动 / 现有会话丢失 / 数据库损坏 / 无法回滚 / 登录凭据丢失 |
-| P1 | 核心路径不可用 | 无法发送消息 / Runtime 切换错误 / Provider 不可用 / Codex MCP 能力不可用 / Windows 命令不可执行 / macOS 通知完全无 fallback |
-| P2 | 可绕过但影响体验 | 视觉错位 / 文案不清 / 轻微交互问题 / console 已知 noise |
+| 级别 | 定义                       | 示例                                                                                                                        |
+| ---- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| P0   | 无法继续测试或可能损坏数据 | 无法安装 / 无法启动 / 现有会话丢失 / 数据库损坏 / 无法回滚 / 登录凭据丢失                                                   |
+| P1   | 核心路径不可用             | 无法发送消息 / Runtime 切换错误 / Provider 不可用 / Codex MCP 能力不可用 / Windows 命令不可执行 / macOS 通知完全无 fallback |
+| P2   | 可绕过但影响体验           | 视觉错位 / 文案不清 / 轻微交互问题 / console 已知 noise                                                                     |
 
 ## 建议 Smoke
 

@@ -9,16 +9,16 @@
 
 这份计划用于交给 Claude Code 执行：当前目标不是继续做新功能，而是把 0.55 preview 用户反馈里会阻断使用或明显影响信任的问题一次性收口，然后再进入合并前打包 smoke。
 
-| Phase | 内容 | 状态 | 备注 |
-|-------|------|------|------|
-| Phase 0 | Scope freeze + 证据基线 | ✅ 完成 2026-06-02 | 明确 FileTree / Workflow 不进本轮；plan + 0.55.0-preview.5 内测说明落地，已对照代码评审 6 个 Phase 根因 |
-| Phase 1 | Windows Codex 启动 / 登录 P0 | ✅ 完成 2026-06-02 | `.cmd` shim spawn EINVAL → `buildCodexLaunch` cmd.exe wrapper；真机 smoke 留 Phase 7 |
-| Phase 2 | 中断任务后输入无响应 P0 | ✅ 完成 2026-06-02 | GitHub #578；force-abort 脱离 interrupt fetch `.finally`，先且无条件调度 |
-| Phase 3 | Windows app shell / installer / packaged cache | ✅ 完成 2026-06-02 | single-instance lock / NSIS 可选目录 / 内存 cacheHandler 免 `.next/cache` 写盘 |
-| Phase 4 | 新会话 provider / Mimo mapping | ✅ 完成 2026-06-02 | #577A=MiMo 缺 model 字段+stale 默认（非"覆盖"）；#577B=SDK result 后 catch 仍 emit error |
-| Phase 5 | 两个用户体验阻断 | ✅ 完成 2026-06-02 | 移除发送阶段 permission-elevation checkpoint；fullscreen dialog close 让出 Windows WCO |
-| Phase 6 | 日志噪音与非阻塞记录 | ✅ 完成 2026-06-02 | Feishu bot info 改用 `client.request` 文档端点；失败每进程仅记一次 |
-| Phase 7 | Packaged smoke + 合并准备 | 📋 待开始 | macOS arm64 + Windows 包，真实安装验证 |
+| Phase   | 内容                                           | 状态               | 备注                                                                                                    |
+| ------- | ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Phase 0 | Scope freeze + 证据基线                        | ✅ 完成 2026-06-02 | 明确 FileTree / Workflow 不进本轮；plan + 0.55.0-preview.5 内测说明落地，已对照代码评审 6 个 Phase 根因 |
+| Phase 1 | Windows Codex 启动 / 登录 P0                   | ✅ 完成 2026-06-02 | `.cmd` shim spawn EINVAL → `buildCodexLaunch` cmd.exe wrapper；真机 smoke 留 Phase 7                    |
+| Phase 2 | 中断任务后输入无响应 P0                        | ✅ 完成 2026-06-02 | GitHub #578；force-abort 脱离 interrupt fetch `.finally`，先且无条件调度                                |
+| Phase 3 | Windows app shell / installer / packaged cache | ✅ 完成 2026-06-02 | single-instance lock / NSIS 可选目录 / 内存 cacheHandler 免 `.next/cache` 写盘                          |
+| Phase 4 | 新会话 provider / Mimo mapping                 | ✅ 完成 2026-06-02 | #577A=MiMo 缺 model 字段+stale 默认（非"覆盖"）；#577B=SDK result 后 catch 仍 emit error                |
+| Phase 5 | 两个用户体验阻断                               | ✅ 完成 2026-06-02 | 移除发送阶段 permission-elevation checkpoint；fullscreen dialog close 让出 Windows WCO                  |
+| Phase 6 | 日志噪音与非阻塞记录                           | ✅ 完成 2026-06-02 | Feishu bot info 改用 `client.request` 文档端点；失败每进程仅记一次                                      |
+| Phase 7 | Packaged smoke + 合并准备                      | 📋 待开始          | macOS arm64 + Windows 包，真实安装验证                                                                  |
 
 ## 用户会看到什么
 
@@ -42,17 +42,17 @@
 
 ### 用户反馈
 
-| 来源 | 现象 | 本轮状态 |
-|------|------|----------|
-| Windows 用户截图 / 日志 | `Error: Codex app-server spawn failed: spawn EINVAL` | P0 |
-| Windows 用户反馈 | 关闭菜单 / 窗口后托盘图标重复增加，任务管理器有多个后台任务 | P1 |
-| Windows 用户反馈 | 安装时不能选择安装位置 | P1 |
-| GitHub [#578](https://github.com/op7418/CodePilot/issues/578) | 构建任务中断后，再在输入框中点击发送无响应 | P0 |
-| GitHub [#577](https://github.com/op7418/CodePilot/issues/577) | 新会话正常回答后追加 provider error；Mimo mapping 回退 | P1 |
-| 用户截图 | full access 下每次发送都要点“已了解，继续发送” | P1 |
-| 用户截图 | Windows 编辑服务商时系统关闭按钮和应用内关闭按钮太近 | P1 |
-| Windows 日志 | `EPERM: operation not permitted, mkdir 'C:\Program Files\CodePilot\resources\standalone\.next\cache'` | P1 |
-| Windows 日志 | Feishu bridge 每分钟 `Cannot read properties of undefined (reading 'v3')` | P2 |
+| 来源                                                           | 现象                                                                                                  | 本轮状态 |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------- |
+| Windows 用户截图 / 日志                                        | `Error: Codex app-server spawn failed: spawn EINVAL`                                                  | P0       |
+| Windows 用户反馈                                               | 关闭菜单 / 窗口后托盘图标重复增加，任务管理器有多个后台任务                                           | P1       |
+| Windows 用户反馈                                               | 安装时不能选择安装位置                                                                                | P1       |
+| GitHub [#578](https://github.com/erbanku/CodePilot/issues/578) | 构建任务中断后，再在输入框中点击发送无响应                                                            | P0       |
+| GitHub [#577](https://github.com/erbanku/CodePilot/issues/577) | 新会话正常回答后追加 provider error；Mimo mapping 回退                                                | P1       |
+| 用户截图                                                       | full access 下每次发送都要点“已了解，继续发送”                                                        | P1       |
+| 用户截图                                                       | Windows 编辑服务商时系统关闭按钮和应用内关闭按钮太近                                                  | P1       |
+| Windows 日志                                                   | `EPERM: operation not permitted, mkdir 'C:\Program Files\CodePilot\resources\standalone\.next\cache'` | P1       |
+| Windows 日志                                                   | Feishu bridge 每分钟 `Cannot read properties of undefined (reading 'v3')`                             | P2       |
 
 ### 本地代码证据
 
@@ -317,20 +317,20 @@ Windows 下编辑服务商窗口 / 面板右上角不会有应用内关闭按钮
 
 ### 验收清单
 
-| 平台 | 场景 | 结果 |
-|------|------|------|
-| macOS arm64 | 启动、菜单栏图标、Claude Code、Codex、full access 连续发送 | 待填 |
-| Windows | 安装可选目录、启动无 cache EPERM、单实例 tray、Codex 登录/发送、编辑服务商 close button | 待填 |
-| Windows | 中断任务后再次发送 | 待填 |
-| Provider | Mimo / Anthropic Third-party API 新会话 | 待填 |
+| 平台        | 场景                                                                                    | 结果 |
+| ----------- | --------------------------------------------------------------------------------------- | ---- |
+| macOS arm64 | 启动、菜单栏图标、Claude Code、Codex、full access 连续发送                              | 待填 |
+| Windows     | 安装可选目录、启动无 cache EPERM、单实例 tray、Codex 登录/发送、编辑服务商 close button | 待填 |
+| Windows     | 中断任务后再次发送                                                                      | 待填 |
+| Provider    | Mimo / Anthropic Third-party API 新会话                                                 | 待填 |
 
 ## Smoke Ledger（真实凭据 / UI / E2E 验证记录）
 
-| Date | Runtime | Provider | Model | 凭据形态 | 场景 | Result | Evidence |
-|------|---------|----------|-------|---------|------|--------|----------|
-| _待跑_ | codex_runtime | Codex Account | gpt-5.5 | 用户登录 | Windows packaged Codex app-server + chat | 📋 | Windows 用户机器 / log |
-| _待跑_ | claude_code | Claude Code | sonnet | 用户本机授权 | full access 连续发送两条 | 📋 | screenshot / session id |
-| _待跑_ | codepilot_runtime | Xiaomi MiMo | v2.5/v2.5pro | API key | 新会话不追加 provider error | 📋 | provider id / session id |
+| Date   | Runtime           | Provider      | Model        | 凭据形态     | 场景                                     | Result | Evidence                 |
+| ------ | ----------------- | ------------- | ------------ | ------------ | ---------------------------------------- | ------ | ------------------------ |
+| _待跑_ | codex_runtime     | Codex Account | gpt-5.5      | 用户登录     | Windows packaged Codex app-server + chat | 📋     | Windows 用户机器 / log   |
+| _待跑_ | claude_code       | Claude Code   | sonnet       | 用户本机授权 | full access 连续发送两条                 | 📋     | screenshot / session id  |
+| _待跑_ | codepilot_runtime | Xiaomi MiMo   | v2.5/v2.5pro | API key      | 新会话不追加 provider error              | 📋     | provider id / session id |
 
 ## 给 Claude Code 的执行摘要
 

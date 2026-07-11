@@ -1,15 +1,15 @@
-import Image from 'next/image';
-import type { MarketingContent } from '../../../content/marketing/en';
-import { ChatDemo } from './ChatDemo';
-import { TypewriterWords } from './TypewriterWords';
-import { RainbowButton } from '@/components/ui/rainbow-button';
-import { FlickeringGrid } from '@/components/ui/flickering-grid';
+import Image from "next/image";
+import type { MarketingContent } from "../../../content/marketing/en";
+import { ChatDemo } from "./ChatDemo";
+import { TypewriterWords } from "./TypewriterWords";
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
 
 export function HeroSection({
   content,
   locale,
 }: {
-  content: MarketingContent['hero'];
+  content: MarketingContent["hero"];
   locale: string;
 }) {
   return (
@@ -36,11 +36,11 @@ export function HeroSection({
                   </span>
                 </div>
                 <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-                  <span className="font-semibold text-foreground">EN</span>{' '}
+                  <span className="font-semibold text-foreground">EN</span>{" "}
                   {content.notice.english}
                 </p>
                 <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">
-                  <span className="font-semibold text-foreground">中文</span>{' '}
+                  <span className="font-semibold text-foreground">中文</span>{" "}
                   {content.notice.chinese}
                 </p>
               </div>
@@ -57,12 +57,15 @@ export function HeroSection({
           />
 
           <h1 className="mt-5 text-[28px] font-semibold leading-snug text-foreground md:text-[34px] lg:text-[40px]">
-            {content.tagline}{' '}
-            <TypewriterWords locale={locale} />
+            {content.tagline} <TypewriterWords locale={locale} />
           </h1>
 
           <div className="mt-7 flex items-center justify-center">
-            <a href="https://github.com/op7418/CodePilot/releases/latest" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/erbanku/CodePilot/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <RainbowButton className="h-14 rounded-full px-14 text-lg">
                 {content.cta}
               </RainbowButton>
@@ -76,8 +79,10 @@ export function HeroSection({
           <div
             className="absolute -inset-x-24 -bottom-32 top-24 z-0"
             style={{
-              maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
-              WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+              maskImage:
+                "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse at center, black 30%, transparent 75%)",
             }}
           >
             <FlickeringGrid

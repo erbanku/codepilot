@@ -39,7 +39,8 @@ const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || "0.0.0";
  * which only needs to label the build, not gate behavior.
  */
 function detectPlatform(): { os: string; channel: string } {
-  if (typeof navigator === "undefined") return { os: "Unknown", channel: "Unknown" };
+  if (typeof navigator === "undefined")
+    return { os: "Unknown", channel: "Unknown" };
   const ua = navigator.userAgent || "";
   const channel = ua.includes("Electron") ? "Electron App" : "Web";
   let os = "Unknown";
@@ -167,7 +168,9 @@ export function AboutSection() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">{t("settings.about" as TranslationKey)}</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t("settings.about" as TranslationKey)}
+        </h2>
         <p className="text-sm text-muted-foreground mt-1.5">
           {t("settings.aboutDesc" as TranslationKey)}
         </p>
@@ -190,8 +193,9 @@ export function AboutSection() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {updateInfo?.updateAvailable && !checking && (
-              updateInfo.readyToInstall ? (
+            {updateInfo?.updateAvailable &&
+              !checking &&
+              (updateInfo.readyToInstall ? (
                 <Button size="sm" onClick={quitAndInstall}>
                   <CodePilotIcon name="refresh" size="sm" aria-hidden />
                   {t("update.restartToUpdate")}
@@ -209,8 +213,7 @@ export function AboutSection() {
                 >
                   {t("settings.viewRelease")}
                 </Button>
-              ) : null
-            )}
+              ) : null)}
             <Button
               variant="outline"
               size="sm"
@@ -223,7 +226,9 @@ export function AboutSection() {
               ) : (
                 <CodePilotIcon name="refresh" size="sm" aria-hidden />
               )}
-              {checking ? t("settings.checking") : t("settings.checkForUpdates")}
+              {checking
+                ? t("settings.checking")
+                : t("settings.checkForUpdates")}
             </Button>
           </div>
         </div>
@@ -238,10 +243,14 @@ export function AboutSection() {
                   />
                   <span className="text-sm">
                     {updateInfo.readyToInstall
-                      ? t("update.readyToInstall", { version: updateInfo.latestVersion })
+                      ? t("update.readyToInstall", {
+                          version: updateInfo.latestVersion,
+                        })
                       : isDownloading
                         ? `${t("update.downloading")} ${Math.round(updateInfo.downloadProgress!)}%`
-                        : t("settings.updateAvailable", { version: updateInfo.latestVersion })}
+                        : t("settings.updateAvailable", {
+                            version: updateInfo.latestVersion,
+                          })}
                   </span>
                   {updateInfo.releaseNotes && (
                     <Button
@@ -258,16 +267,22 @@ export function AboutSection() {
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-primary transition-all"
-                      style={{ width: `${Math.min(updateInfo.downloadProgress!, 100)}%` }}
+                      style={{
+                        width: `${Math.min(updateInfo.downloadProgress!, 100)}%`,
+                      }}
                     />
                   </div>
                 )}
                 {updateInfo.lastError && (
-                  <p className="text-xs text-status-error-foreground">{updateInfo.lastError}</p>
+                  <p className="text-xs text-status-error-foreground">
+                    {updateInfo.lastError}
+                  </p>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">{t("settings.latestVersion")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("settings.latestVersion")}
+              </p>
             )}
           </div>
         )}
@@ -290,7 +305,9 @@ export function AboutSection() {
             <span className="text-[11px] text-muted-foreground shrink-0">
               {t("about.platform.channel")}
             </span>
-            <span className="text-xs text-foreground/85">{platform.channel}</span>
+            <span className="text-xs text-foreground/85">
+              {platform.channel}
+            </span>
           </div>
           <div className="py-2.5 flex items-center justify-between gap-3">
             <span className="text-[11px] text-muted-foreground shrink-0">
@@ -379,7 +396,9 @@ export function AboutSection() {
             variant="outline"
             size="sm"
             className="text-xs gap-1.5"
-            onClick={() => window.dispatchEvent(new CustomEvent("open-setup-center"))}
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("open-setup-center"))
+            }
           >
             <CodePilotIcon name="diagnose" size="sm" aria-hidden />
             {t("about.support.runSetupWizard")}
@@ -394,7 +413,10 @@ export function AboutSection() {
             {t("cli.importButton" as TranslationKey)}
           </Button>
         </div>
-        <ImportSessionDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+        <ImportSessionDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+        />
       </SettingsCard>
 
       {/* External links. Fixed URLs, opened in new tab. */}
@@ -407,7 +429,9 @@ export function AboutSection() {
             variant="outline"
             size="sm"
             className="text-xs gap-1.5"
-            onClick={() => window.open("https://github.com/op7418/CodePilot", "_blank")}
+            onClick={() =>
+              window.open("https://github.com/erbanku/CodePilot", "_blank")
+            }
           >
             <ArrowSquareOut size={14} />
             GitHub
@@ -416,7 +440,12 @@ export function AboutSection() {
             variant="outline"
             size="sm"
             className="text-xs gap-1.5"
-            onClick={() => window.open("https://github.com/op7418/CodePilot/issues", "_blank")}
+            onClick={() =>
+              window.open(
+                "https://github.com/erbanku/CodePilot/issues",
+                "_blank",
+              )
+            }
           >
             <ArrowSquareOut size={14} />
             {t("about.docs.submitFeedback")}
@@ -425,7 +454,12 @@ export function AboutSection() {
             variant="outline"
             size="sm"
             className="text-xs gap-1.5"
-            onClick={() => window.open("https://github.com/op7418/CodePilot/releases", "_blank")}
+            onClick={() =>
+              window.open(
+                "https://github.com/erbanku/CodePilot/releases",
+                "_blank",
+              )
+            }
           >
             <ArrowSquareOut size={14} />
             {t("about.docs.releaseNotes")}

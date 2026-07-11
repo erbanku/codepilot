@@ -7,16 +7,16 @@
 
 ## ClaudeCode Runtime (主要痛点 — 已 verify)
 
-Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspace `/Users/op7418/Documents/test-workspace2`)
+Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspace `/Users/erbanku/Documents/test-workspace2`)
 
 ### 反例 baseline — 无 tool_use → entries omit (no fabrication) ✅
 
-| Field | Value |
-|---|---|
-| DB row | `f2b2503d2a64bed66f3014997525dd2c` |
-| Time | 2026-05-20 17:55:37 |
-| User prompt | "用 humanizer-zh 优化一下：AI 真的不仅仅是一个强大的工具..." |
-| Claude tool_use count | 0 (Claude 走 inline 推理，没 invoke 任何 tool) |
+| Field                 | Value                                                        |
+| --------------------- | ------------------------------------------------------------ |
+| DB row                | `f2b2503d2a64bed66f3014997525dd2c`                           |
+| Time                  | 2026-05-20 17:55:37                                          |
+| User prompt           | "用 humanizer-zh 优化一下：AI 真的不仅仅是一个强大的工具..." |
+| Claude tool_use count | 0 (Claude 走 inline 推理，没 invoke 任何 tool)               |
 
 ```json
 "context_accounting": {
@@ -29,19 +29,20 @@ Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspa
 ```
 
 **结论**：
+
 - `entries.skills` / `entries.mcp` / `entries.tools` **正确 omit**（Phase 7 spec: no tool_use → no entry，防 hallucination）
 - `unsupported` 已收编到 3 项（去掉了 tools/mcp/skills，正是 Phase 7 期望）
 - `producedBy: 'claude_code'` ✓
 
 ### 触发 case — 1 个 Bash tool_use → entries.tools 出现 ✅
 
-| Field | Value |
-|---|---|
-| DB row | `033fd7853ca2dd43a24f9f80293a42fb` |
-| Time | 2026-05-20 17:57:30 |
-| User prompt | "运行 ls 看看当前目录有哪些文件，然后用 humanizer-zh 优化这句..." |
-| Claude tool_use count | 1 Bash (id `call_8d8909fa72dc4bd`) |
-| Tool_result count | 1 (91 chars) — 100% paired ✓ |
+| Field                 | Value                                                             |
+| --------------------- | ----------------------------------------------------------------- |
+| DB row                | `033fd7853ca2dd43a24f9f80293a42fb`                                |
+| Time                  | 2026-05-20 17:57:30                                               |
+| User prompt           | "运行 ls 看看当前目录有哪些文件，然后用 humanizer-zh 优化这句..." |
+| Claude tool_use count | 1 Bash (id `call_8d8909fa72dc4bd`)                                |
+| Tool_result count     | 1 (91 chars) — 100% paired ✓                                      |
 
 ```json
 "context_accounting": {
@@ -55,6 +56,7 @@ Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspa
 ```
 
 **Popover UI 验证** (`phase7-claudecode-bash-1call-popover.png`):
+
 ```
 工具 (Tools): 48
 规则 (Rules): 93
@@ -63,6 +65,7 @@ Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspa
 ```
 
 **结论**：
+
 - `entries.tools` 字段填充：tokens=48 / source=`tool_use/tool/Bash` / detail=`Bash × 1` ✓
 - UI popover **真实显示 "工具 48" 行**（之前 Phase 2-4 该行永远 hide）✓
 - 反例对比铁证：相同 session、相邻两条消息，0 tool_use 对应 entries.tools=undefined；1 Bash 对应 entries.tools=48
@@ -75,6 +78,7 @@ Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspa
 ## Native Runtime ⏳
 
 待用户切到 Native session 跑等效 prompt：
+
 - 反例 baseline: 不触发 tool_use → entries.{rules} only
 - 触发 case: 调 Bash → entries.tools 含 "Bash × N"
 - `producedBy: 'codepilot_runtime'` ✓
@@ -82,6 +86,7 @@ Session `2bbe8d0ff545097345fe4cf27666051f` (Widget session, glm-5-turbo, workspa
 ## Codex Runtime ⏳
 
 待用户切到 Codex session 跑等效 prompt：
+
 - 反例 baseline: 不触发 tool → entries.{rules} only
 - 触发 case: 调 Codex 内置 Bash 或 MCP → entries.tools / entries.mcp 非空
 - `producedBy: 'codex_runtime'` + `providerBackend` 字段透传
@@ -93,10 +98,10 @@ Widget 原始 message golden fixture (DB row `487c190a72ce51e030e706ca7ab3cea8`,
 
 ## 测试覆盖
 
-| 类型 | 数量 | 状态 |
-|---|---|---|
-| Phase 7 contract + fixture unit | 27 | ✅ |
-| 全套单元测试 | 2948 | ✅ |
-| TypeScript strict | full | ✅ |
-| 真实 UI smoke (ClaudeCode 反例 + 触发) | 2 | ✅ |
-| Native / Codex 真实 UI smoke | 0 | ⏳ user |
+| 类型                                   | 数量 | 状态    |
+| -------------------------------------- | ---- | ------- |
+| Phase 7 contract + fixture unit        | 27   | ✅      |
+| 全套单元测试                           | 2948 | ✅      |
+| TypeScript strict                      | full | ✅      |
+| 真实 UI smoke (ClaudeCode 反例 + 触发) | 2    | ✅      |
+| Native / Codex 真实 UI smoke           | 0    | ⏳ user |

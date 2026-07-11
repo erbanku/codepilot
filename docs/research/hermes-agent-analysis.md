@@ -10,13 +10,15 @@
 ## 来源钉定
 
 **Hermes 本地快照**
-- 路径：`/Users/op7418/Documents/code/资料/hermes-agent-main`
+
+- 路径：`/Users/erbanku/Documents/code/资料/hermes-agent-main`
 - 快照时点：2026-04-09（对应仓内 `RELEASE_v0.8.0.md` 发布窗口）
 - 非 git 仓库（ZIP 解压），无 commit SHA；只能按路径 + 行号引用
 - Hermes 上游真正的 tag 是日期制（`v2026.4.8` 等），**不存在 `v0.8.0` tag**，只有 `RELEASE_v0.8.0.md` 这个文件名
 - 本文 "Hermes 事实层" 的所有引用均基于此本地副本
 
 **CodePilot 基线**
+
 - 权威文档：`docs/handover/decouple-native-runtime.md`
 - 代码引用：`src/...:行号` 形式，便于复核
 
@@ -29,14 +31,14 @@
 核心 `AIAgent` 类和 `run_conversation()` 主循环仍在 **`run_agent.py`（9,660 行，487KB，仓库根目录）**。
 与此**并列**，`agent/` 目录下有 26 个独立模块，其中正好装着本文推荐借鉴的多数能力：
 
-| 模块 | 行数 | 职责 |
-|---|---|---|
-| `agent/auxiliary_client.py` | 2253 | 辅助模型统一路由，多档 fallback |
-| `agent/context_compressor.py` | 745 | LLM 驱动上下文压缩 |
-| `agent/memory_manager.py` | 367 | 可插拔记忆后端管理 |
-| `agent/subdirectory_hints.py` | 224 | 渐进式子目录 hint 发现 |
-| `agent/models_dev.py` | — | models.dev 目录集成 |
-| `agent/smart_model_routing.py` | — | 模型能力路由 |
+| 模块                           | 行数 | 职责                            |
+| ------------------------------ | ---- | ------------------------------- |
+| `agent/auxiliary_client.py`    | 2253 | 辅助模型统一路由，多档 fallback |
+| `agent/context_compressor.py`  | 745  | LLM 驱动上下文压缩              |
+| `agent/memory_manager.py`      | 367  | 可插拔记忆后端管理              |
+| `agent/subdirectory_hints.py`  | 224  | 渐进式子目录 hint 发现          |
+| `agent/models_dev.py`          | —    | models.dev 目录集成             |
+| `agent/smart_model_routing.py` | —    | 模型能力路由                    |
 
 **关键观察**：run_agent.py 是单文件巨构（属于已知技术债），但参考实现是**干净隔离**的——
 要 port 到 TS/Next.js，看的是 `agent/*.py` 里这些独立模块，不需要去扒 9660 行的主循环。
@@ -46,12 +48,13 @@
 docstring 原文（粘贴以免转述失真）：
 
 > "Each agent (parent or subagent) gets its own `IterationBudget`.
->  The parent's budget is capped at `max_iterations` (default 90).
->  Each subagent gets an independent budget capped at `delegation.max_iterations`
->  (default 50) — this means total iterations across parent + subagents
->  **can exceed the parent's cap**."
+> The parent's budget is capped at `max_iterations` (default 90).
+> Each subagent gets an independent budget capped at `delegation.max_iterations`
+> (default 50) — this means total iterations across parent + subagents
+> **can exceed the parent's cap**."
 
 关键事实：
+
 - 父子 agent **各自独立预算，不共享**
 - 父默认 90 步，子默认 50 步，由 `config.yaml` 的 `delegation.max_iterations` 控制
 - **总消耗可以超过父 cap**——因为子是独立计量的
@@ -64,12 +67,15 @@ docstring 原文（粘贴以免转述失真）：
 共四层判定：
 
 **层 1 — 交互工具黑名单（`run_agent.py:215`，仅 1 条）**
+
 ```python
 _NEVER_PARALLEL_TOOLS = frozenset({"clarify"})
 ```
+
 出现 `clarify`（需要用户输入）即整批串行。黑名单刻意保持极小。
 
 **层 2 — 只读白名单（`run_agent.py:217-229`）**
+
 ```python
 _PARALLEL_SAFE_TOOLS = frozenset({
     "ha_get_state", "ha_list_entities", "ha_list_services",
@@ -78,17 +84,21 @@ _PARALLEL_SAFE_TOOLS = frozenset({
     "web_extract", "web_search",
 })
 ```
+
 明确枚举"只读、无共享可变状态"的工具才进白名单。非白名单非路径工具一律保守串行。
 
 **层 3 — 路径作用域工具 + 冲突检测（`run_agent.py:232-335`）**
+
 ```python
 _PATH_SCOPED_TOOLS = frozenset({"read_file", "write_file", "patch"})
 ```
+
 对这三个工具，`_extract_parallel_scope_path()` 规范化 `path` 参数（展开 `~`、转绝对路径、避开 `.resolve()` 以兼容未存在文件），
 然后 `_paths_overlap()` 用**前缀比较**判定冲突（`a/b/c` 与 `a/b` 视为重叠）。
 任一 batch 内有路径重叠 → 整批串行。
 
 **层 4 — 终端命令危险模式正则（`run_agent.py:238-263`）**
+
 ```python
 _DESTRUCTIVE_PATTERNS = re.compile(
     r"""(?:^|\s|&&|\|\||;|`)(?:
@@ -99,9 +109,11 @@ _DESTRUCTIVE_PATTERNS = re.compile(
 )
 _REDIRECT_OVERWRITE = re.compile(r'[^>]>[^>]|^>[^>]')
 ```
+
 `_is_destructive_command()` 对 terminal 命令跑正则：命中破坏性模式或 `>` 重定向覆盖 → 视为写操作。
 
 **其他约束**：
+
 - worker 池上限 `_MAX_TOOL_WORKERS = 8`（`run_agent.py:236`）
 - 单个 tool call 的 batch 不并行：`if len(tool_calls) <= 1: return False`
 - args 解析失败或非 dict → 保守串行
@@ -161,6 +173,7 @@ docstring 原文定位：`agent/auxiliary_client.py:1-43`。
 > 5. On subsequent compactions, iteratively update the previous summary
 
 **关键参数**（:64-102）：
+
 - 默认阈值 `threshold_percent = 0.50`（**不是** 80%——超过上下文窗口一半就开始压缩）
 - `protect_first_n = 3`（保护前 3 条消息）
 - `protect_last_n = 20`（保护最后 20 条，叠加 token 预算约束）
@@ -177,13 +190,13 @@ docstring 原文定位：`agent/auxiliary_client.py:1-43`。
 
 ### 1.7 与本文前一版本（2026-04-09）的差异修正
 
-| 前版表述 | 真实情况 |
-|---|---|
-| "v0.8.0" | 无此 tag；`RELEASE_v0.8.0.md` 只是文件名；Hermes 用日期制 tag |
+| 前版表述                                      | 真实情况                                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| "v0.8.0"                                      | 无此 tag；`RELEASE_v0.8.0.md` 只是文件名；Hermes 用日期制 tag                         |
 | "9,660 行单文件是技术债，Hermes 自己也在拆分" | 行数对（本地快照），但**不应只看 run_agent.py**——推荐借鉴的组件已独立在 `agent/` 目录 |
-| "跨 agent 共享总预算" | **反了**。父子各自独立，总量可超父 cap |
-| "网关的 355KB 单文件" | 错。真正的单文件巨构是 `cli.py`（392KB）；`gateway/` 本身是多文件目录 |
-| "LLM 压缩触发阈值 80%" | 错。默认 50%（`threshold_percent=0.50`） |
+| "跨 agent 共享总预算"                         | **反了**。父子各自独立，总量可超父 cap                                                |
+| "网关的 355KB 单文件"                         | 错。真正的单文件巨构是 `cli.py`（392KB）；`gateway/` 本身是多文件目录                 |
+| "LLM 压缩触发阈值 80%"                        | 错。默认 50%（`threshold_percent=0.50`）                                              |
 
 ---
 
@@ -212,7 +225,8 @@ while (step < maxSteps) {
 
 ```ts
 const RECENT_TURNS_TO_KEEP = 6; // Keep last N messages fully intact
-const TRUNCATED_RESULT_MARKER = '[Tool result truncated — see earlier in conversation]';
+const TRUNCATED_RESULT_MARKER =
+  "[Tool result truncated — see earlier in conversation]";
 ```
 
 - 策略：保留最近 6 轮完整；更早的 tool result 全部替换为**固定截断字符串**
@@ -242,22 +256,26 @@ export function shouldAutoCompact(messages, contextWindowTokens): boolean {
 ```
 
 **已有**（`src/lib/builtin-tools/memory-search.ts:20-80`）：
+
 - `codepilot_memory_search`：基于 `searchWorkspace` 的工作区记忆检索，支持 `tags` / `file_type` / `limit` 过滤
 - `codepilot_memory_get`：按文件路径 + 行范围读取
 - `codepilot_memory_recent`：读最近 3 天 daily + 长期记忆摘要
 
 **没有**：
+
 - **Session 历史搜索**。`messages` 表数据完整存在 SQLite（schema 见 `docs/research/session-management-and-context-compaction.md:29-40`），
   但没有工具把它暴露给模型做跨会话全文检索
 
 ### 2.5 项目指令发现仅两级（`src/lib/agent-system-prompt.ts:210-236`）
 
 `discoverProjectInstructions()` 当前的发现层级：
+
 1. 用户级：`~/.claude/CLAUDE.md`
 2. 项目级（cwd）：`CLAUDE.md` / `AGENTS.md` / `.claude/settings.md` / `.claude/CLAUDE.md`
 3. 父目录级：`dirname(cwd)/{CLAUDE.md, AGENTS.md}`
 
 **没有**：
+
 - 随 tool call 访问路径**渐进式**加载子目录的 AGENTS/CLAUDE——monorepo、
   Obsidian vault、非 cwd 子树的 hint 全部丢失
 - 保护 prompt caching 的"追加到 tool result"机制——现在是直接拼到 system prompt
@@ -276,6 +294,7 @@ sdkProxyOnly?: boolean;
 ```
 
 设计辅助模型 fallback 链时必须考虑的硬约束：
+
 - `sdkProxyOnly=true` 的 provider **不能**走 AI SDK 的 `streamText` / `generateText`
 - 辅助任务（压缩、摘要、vision）走的就是 AI SDK 文本生成路径
 - 所以当用户主 provider 是 `sdkProxyOnly` 时，**必须** fallback 到另一个支持标准 Messages API 的 provider，
@@ -284,12 +303,18 @@ sdkProxyOnly?: boolean;
 ### 2.7 Provider 预设里已有的小模型槽位（`src/lib/provider-catalog.ts:41, :73-75`）
 
 ```ts
-export type ModelRole = 'default' | 'reasoning' | 'small' | 'haiku' | 'sonnet' | 'opus';
+export type ModelRole =
+  | "default"
+  | "reasoning"
+  | "small"
+  | "haiku"
+  | "sonnet"
+  | "opus";
 
 interface RoleModels {
   default?: string;
   reasoning?: string;
-  small?: string;    // ← 专为"小/快"副任务设计的槽位
+  small?: string; // ← 专为"小/快"副任务设计的槽位
   haiku?: string;
   sonnet?: string;
   opus?: string;
@@ -297,6 +322,7 @@ interface RoleModels {
 ```
 
 **关键事实**：
+
 - 每个 provider 预设都可以配 `roleModels.small` 或 `roleModels.haiku`——这些已经是 CodePilot 既有的架构约定，用户在 provider 编辑界面能直接改
 - `src/lib/provider-resolver.ts:268-272` 已经在把 `roleModels.small` 写到 Claude Code SDK 的 `ANTHROPIC_SMALL_FAST_MODEL` 环境变量——**SDK 路径下 SDK 自己就会用它做内部副任务**（摘要、标题生成等）。Native Runtime 下这个槽位目前没被读，但数据本身是有的（`ResolvedProvider.roleModels` 位于 `provider-resolver.ts:51`）
 - 非 Anthropic provider 已有映射：GLM 把 `haiku → glm-4.5-air`、`sonnet → glm-5-turbo`、`opus → glm-5.1`（`provider-catalog.ts:262-266`）
@@ -332,6 +358,7 @@ interface RoleModels {
 ### 3.2 P0 — 辅助模型解析 + sdkProxyOnly fallback + 主模型兜底
 
 **依据**：
+
 - Hermes §1.4（统一路由 + per-task 覆盖 + 402 fallback）
 - CodePilot §2.6（sdkProxyOnly 硬约束）
 - CodePilot §2.7（`roleModels.small` / `.haiku` 槽位早已存在）
@@ -348,6 +375,7 @@ interface RoleModels {
 5. **链全部耗尽**：**直接用主 provider + 主模型做副任务**（**不是**返回 null 让调用方跳过）
 
 **为什么兜底是主模型而不是跳过（last-resort ≠ null）**：
+
 - 用户可能完全没配其他 provider，跳过会让压缩/vision/摘要静默失效——这是用户感受上的"功能不见了"
 - "成本优化失败"的正确降级是"不优化"，不是"不做"
 - 主模型做副任务至少和现状持平（反正现在就是主模型在做所有事），不引入新的故障模式
@@ -357,6 +385,7 @@ interface RoleModels {
 在 `resolveAuxiliaryModel` 的调用包装里捕获 HTTP 402 与典型 credit 耗尽错误，切换到链的下一档重试；如果已经在最后一档（主模型），向用户报错（因为主对话也会卡住，不是副任务独有问题）。
 
 **不要做的事**：
+
 - **不要硬编码** "Anthropic → Haiku、OpenAI → gpt-mini" 类映射 → 复用 `roleModels` 即可（§2.7）
 - **不要假设** "同 provider 的小模型一定可用" → sdkProxyOnly 打破了这个假设（§2.6）
 - **不要**为每个副任务独立维护 fallback 链 → 统一走 `resolveAuxiliaryModel`，per-task 覆盖用环境变量/配置，不是用代码
@@ -382,6 +411,7 @@ interface RoleModels {
 ### 3.4 P1 — session 历史搜索工具
 
 **依据**：
+
 - Hermes §1.3 的 `_PARALLEL_SAFE_TOOLS` 白名单里赫然有 `session_search`
 - CodePilot §2.4：memory_search 已成熟但只搜工作区文件；messages 表完全没有搜索工具
 
@@ -395,6 +425,7 @@ interface RoleModels {
 5. 注册到 agent-tools.ts，与 memory_search 平级
 
 **排在 LLM 压缩之前的三个理由**：
+
 - CodePilot §2.3 的死代码信号：长上下文退化还不是活跃痛点
 - 复用现有工具壳，成本比从零做 LLM 压缩低一个量级
 - 对"找回以前对话里讨论过什么"这种诉求，session 搜索是**直接答案**，不是迂回优化
@@ -406,6 +437,7 @@ interface RoleModels {
 **建议分两步**：
 
 **步 1 — 先把现有基础设施接线**：
+
 1. 在 `src/lib/agent-loop.ts:225` 的 while 入口加 `shouldAutoCompact(messages, contextWindow)` 检查
 2. 触发后调用**增强版** `pruneOldToolResults`——
    - 不再固定 6 轮，按 token 预算动态裁（对应 Hermes 的 `protect_last_n` + `tail_token_budget` 双约束）
@@ -414,12 +446,14 @@ interface RoleModels {
 3. 注意：`shouldAutoCompact` 当前阈值写死 0.8，Hermes 的默认 0.5 更保守——可配置化
 
 **步 2 — 再接辅助模型做真正的摘要**：
+
 1. 依赖 §3.2 的 `resolveAuxiliaryProvider('compact')` 就绪
 2. 对被裁掉的中段消息调用小模型生成 Goal / Progress / Decisions / Files / Next Steps 结构化摘要
 3. 失败时 fallback 到步 1 的纯裁剪版（参考 Hermes `_SUMMARY_FAILURE_COOLDOWN_SECONDS = 600`）
 4. 多次压缩时迭代更新上次的摘要，而非从头重生成
 
 **排在 session_search 之后的理由**：
+
 - §2.3 死代码信号：没有实测数据支持"长上下文退化是当前痛点"
 - `pruneOldToolResults` 的粗暴截断是**真正**的第一痛点，步 1 就能缓解大半，不需要步 2
 - 步 2 强依赖 §3.2 的辅助 provider 路由，工程链路长
@@ -442,14 +476,14 @@ CodePilot 是双 runtime 架构（见 `docs/handover/decouple-native-runtime.md`
 
 **对照表**：
 
-| # | 建议 | Native Runtime<br>(AI SDK) | SDK Runtime<br>(Claude Code CLI) | 备注 |
-|---|---|---|---|---|
-| 3.1 | 并行安全调度器 | ✅ 独占 | ❌ 不适用 | 工具调度在 CLI 子进程内部，改不到 |
-| 3.2 | 辅助模型解析 + 兜底 | ✅ 主战场（新 `resolveAuxiliaryModel`） | 🟡 已部分就位 | 见下方"SDK 已有的隐式优化" |
-| 3.3 | 渐进式子目录 hint | ✅ 独占 | ❌ 代价过高 | Native 可在 tool 包装层直接改 tool result；SDK 下需拦截 SSE 流，脆弱性高 |
-| 3.4 | Session 历史搜索 | ✅ 两边 | ✅ 两边 | 实现与 runtime 无关，一份代码通过 `codepilot_*` 内置 MCP server 暴露 |
-| 3.5 | 长对话压缩（auto-compact + LLM 摘要） | ✅ 独占 | ❌ 不适用 | `pruneOldToolResults` / `shouldAutoCompact` 只在 `agent-loop.ts` 的 while 循环里被调用 |
-| 3.6 | Skill 自动创建 | ✅ 两边 | ✅ 两边 | Native hook 在 `agent-loop.ts` while 退出处；SDK hook 在 `stream-session-manager.ts` 流结束处；逻辑可抽公共函数复用 |
+| #   | 建议                                  | Native Runtime<br>(AI SDK)              | SDK Runtime<br>(Claude Code CLI) | 备注                                                                                                                |
+| --- | ------------------------------------- | --------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 3.1 | 并行安全调度器                        | ✅ 独占                                 | ❌ 不适用                        | 工具调度在 CLI 子进程内部，改不到                                                                                   |
+| 3.2 | 辅助模型解析 + 兜底                   | ✅ 主战场（新 `resolveAuxiliaryModel`） | 🟡 已部分就位                    | 见下方"SDK 已有的隐式优化"                                                                                          |
+| 3.3 | 渐进式子目录 hint                     | ✅ 独占                                 | ❌ 代价过高                      | Native 可在 tool 包装层直接改 tool result；SDK 下需拦截 SSE 流，脆弱性高                                            |
+| 3.4 | Session 历史搜索                      | ✅ 两边                                 | ✅ 两边                          | 实现与 runtime 无关，一份代码通过 `codepilot_*` 内置 MCP server 暴露                                                |
+| 3.5 | 长对话压缩（auto-compact + LLM 摘要） | ✅ 独占                                 | ❌ 不适用                        | `pruneOldToolResults` / `shouldAutoCompact` 只在 `agent-loop.ts` 的 while 循环里被调用                              |
+| 3.6 | Skill 自动创建                        | ✅ 两边                                 | ✅ 两边                          | Native hook 在 `agent-loop.ts` while 退出处；SDK hook 在 `stream-session-manager.ts` 流结束处；逻辑可抽公共函数复用 |
 
 **为什么多数建议"只能在 Native 做"**：
 
@@ -457,6 +491,7 @@ CodePilot 是双 runtime 架构（见 `docs/handover/decouple-native-runtime.md`
 这给了我们在对话流程任意位置插入逻辑的能力：压缩前预检、工具调用前安全判定、tool result 追加 hint 等等。
 
 SDK Runtime 下对话流程封装在 Claude Code CLI 子进程里，我们只能：
+
 1. 启动前设环境变量 / 配置文件
 2. 启动后从 SSE 流读事件
 
@@ -486,6 +521,7 @@ Claude Code CLI 会读 `ANTHROPIC_SMALL_FAST_MODEL` 环境变量做它**自己**
 **对 PR 拆分的提示**：
 
 将来把这份路线图拆成 PR 时，可以按这张归属表分：
+
 - **"Native Runtime 能力升级"大 PR**：§3.1（并行安全）+ §3.2 的 Native 部分（新 `resolveAuxiliaryModel`）+ §3.3（渐进子目录）+ §3.5（长对话压缩）
 - **"跨 runtime 共用能力" PR**：§3.4（session 搜索）+ §3.6（Skill nudge）
 - **"SDK Runtime 预设校验" 小 PR**：确保所有 `provider-catalog.ts` 预设的 `roleModels.small` 都配齐——属于 §3.2 的 SDK 侧补强，成本极低，可以独立落地
@@ -495,13 +531,13 @@ Claude Code CLI 会读 `ANTHROPIC_SMALL_FAST_MODEL` 环境变量做它**自己**
 
 ## 四、不建议借鉴（带理由）
 
-| 内容 | 理由 |
-|---|---|
-| Python 实现直接移植 | 我们是 TS/Next.js 栈 |
-| run_agent.py / cli.py 的单文件巨构风格（分别约 9.7K 行 / 约 400KB） | Hermes 自己的 `agent/` 目录拆分正在反向修正这条路；参考实现本来也不在单文件里 |
-| 完整 browser 工具套件 | 我们有 chrome-devtools MCP，功能重叠 |
-| 多平台 IM 网关（Telegram/Discord/Slack/WhatsApp/Signal/Matrix/钉钉/飞书 8 家） | CodePilot 有独立的 bridge 系统，架构不同；8 家支持不是 runtime 质量瓶颈 |
-| RL 训练数据生成（`environments/hermes_base_env.py`） | 产品定位不同 |
+| 内容                                                                           | 理由                                                                          |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Python 实现直接移植                                                            | 我们是 TS/Next.js 栈                                                          |
+| run_agent.py / cli.py 的单文件巨构风格（分别约 9.7K 行 / 约 400KB）            | Hermes 自己的 `agent/` 目录拆分正在反向修正这条路；参考实现本来也不在单文件里 |
+| 完整 browser 工具套件                                                          | 我们有 chrome-devtools MCP，功能重叠                                          |
+| 多平台 IM 网关（Telegram/Discord/Slack/WhatsApp/Signal/Matrix/钉钉/飞书 8 家） | CodePilot 有独立的 bridge 系统，架构不同；8 家支持不是 runtime 质量瓶颈       |
+| RL 训练数据生成（`environments/hermes_base_env.py`）                           | 产品定位不同                                                                  |
 
 ---
 
@@ -529,6 +565,7 @@ Claude Code CLI 会读 `ANTHROPIC_SMALL_FAST_MODEL` 环境变量做它**自己**
 3. **补充 §3.7 Runtime 归属总览**：明确 6 项建议各自落在 Native Runtime / SDK Runtime / 两边，解释为什么多数"只能在 Native 做"（根因是 Native 持有 agent loop 控制权），并指出 SDK Runtime 其实**已经**通过 `ANTHROPIC_SMALL_FAST_MODEL` 隐式享受到一部分辅助模型优化——§3.2 的本质是让 Native 追平 SDK 既有的隐式能力，而不是引入全新功能。同时给出按 runtime 归属拆 PR 的建议。
 
 **建议后续动作**（不在本调研稿范围内）：
+
 - `ARCHITECTURE.md:3` / `:57` 的主链路描述仍停留在 Claude Agent SDK 单路径，与 `docs/handover/decouple-native-runtime.md` 的双 runtime 口径冲突，
   应在独立的小修 PR 中同步，避免持续污染对比类研究文档
 - `src/lib/context-pruner.ts:2-5` 的 docstring 与实现不符（"short summary" vs 固定 marker），

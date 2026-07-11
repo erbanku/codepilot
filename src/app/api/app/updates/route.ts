@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { getRuntimeArchitectureInfo } from "@/lib/platform";
-import { selectRecommendedReleaseAsset, type ReleaseAsset } from "@/lib/update-release";
+import {
+  selectRecommendedReleaseAsset,
+  type ReleaseAsset,
+} from "@/lib/update-release";
 import { compareSemver } from "@/lib/compare-semver";
 
-const GITHUB_REPO = "op7418/CodePilot";
+const GITHUB_REPO = "erbanku/codepilot";
 
-function noUpdatePayload(currentVersion: string, runtimeInfo: ReturnType<typeof getRuntimeArchitectureInfo>) {
+function noUpdatePayload(
+  currentVersion: string,
+  runtimeInfo: ReturnType<typeof getRuntimeArchitectureInfo>,
+) {
   return {
     latestVersion: currentVersion,
     currentVersion,
@@ -33,7 +39,7 @@ export async function GET() {
       {
         headers: { Accept: "application/vnd.github.v3+json" },
         next: { revalidate: 300 },
-      }
+      },
     );
 
     if (!res.ok) {
@@ -56,7 +62,8 @@ export async function GET() {
       releaseNotes: release.body || "",
       publishedAt: release.published_at || "",
       releaseUrl: release.html_url || "",
-      downloadUrl: recommendedAsset?.browser_download_url || release.html_url || "",
+      downloadUrl:
+        recommendedAsset?.browser_download_url || release.html_url || "",
       downloadAssetName: recommendedAsset?.name || "",
       detectedPlatform: runtimeInfo.platform,
       detectedArch: runtimeInfo.processArch,

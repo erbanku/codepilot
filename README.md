@@ -1,12 +1,11 @@
-<img src="docs/icon-readme.png" width="32" height="32" alt="CodePilot" style="vertical-align: middle; margin-right: 8px;" /> CodePilot
-===
+# <img src="docs/icon-readme.png" width="32" height="32" alt="CodePilot" style="vertical-align: middle; margin-right: 8px;" /> CodePilot
 
 **A multi-model AI agent desktop client** -- connect any AI provider, extend with MCP & skills, control from your phone, and let your assistant learn your workflow.
 
-[![GitHub release](https://img.shields.io/github/v/release/op7418/CodePilot)](https://github.com/op7418/CodePilot/releases)
-[![Downloads](https://img.shields.io/github/downloads/op7418/CodePilot/total)](https://github.com/op7418/CodePilot/releases)
-[![GitHub stars](https://img.shields.io/github/stars/op7418/CodePilot)](https://github.com/op7418/CodePilot/stargazers)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/op7418/CodePilot/releases)
+[![GitHub release](https://img.shields.io/github/v/release/erbanku/CodePilot)](https://github.com/erbanku/CodePilot/releases)
+[![Downloads](https://img.shields.io/github/downloads/erbanku/CodePilot/total)](https://github.com/erbanku/CodePilot/releases)
+[![GitHub stars](https://img.shields.io/github/stars/erbanku/CodePilot)](https://github.com/erbanku/CodePilot/stargazers)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/erbanku/CodePilot/releases)
 [![License](https://img.shields.io/badge/license-BSL--1.1-orange)](LICENSE)
 
 [中文文档](./README_CN.md) | [日本語](./README_JA.md)
@@ -23,13 +22,13 @@
 
 ## Download
 
-| Platform | Download | Architecture |
-|---|---|---|
-| macOS | [Apple Silicon (.dmg)](https://github.com/op7418/CodePilot/releases/latest) · [Intel (.dmg)](https://github.com/op7418/CodePilot/releases/latest) | arm64 / x64 |
-| Windows | [Installer (.exe)](https://github.com/op7418/CodePilot/releases/latest) | x64 + arm64 |
-| Linux | Build from source | x64 + arm64 |
+| Platform | Download                                                                                                                                            | Architecture |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| macOS    | [Apple Silicon (.dmg)](https://github.com/erbanku/CodePilot/releases/latest) · [Intel (.dmg)](https://github.com/erbanku/CodePilot/releases/latest) | arm64 / x64  |
+| Windows  | [Installer (.exe)](https://github.com/erbanku/CodePilot/releases/latest)                                                                            | x64 + arm64  |
+| Linux    | Build from source                                                                                                                                   | x64 + arm64  |
 
-Or visit the [Releases](https://github.com/op7418/CodePilot/releases) page for all versions.
+Or visit the [Releases](https://github.com/erbanku/CodePilot/releases) page for all versions.
 
 ---
 
@@ -39,14 +38,14 @@ Or visit the [Releases](https://github.com/op7418/CodePilot/releases) page for a
 
 Connect to **17+ AI providers** out of the box. Switch providers and models mid-conversation without losing context.
 
-| Category | Providers |
-|---|---|
-| Direct API | Anthropic, OpenRouter |
-| Cloud platforms | AWS Bedrock, Google Vertex AI |
+| Category             | Providers                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Direct API           | Anthropic, OpenRouter                                                                                                   |
+| Cloud platforms      | AWS Bedrock, Google Vertex AI                                                                                           |
 | Chinese AI providers | Zhipu GLM (CN/Global), Kimi, Moonshot, MiniMax (CN/Global), Volcengine Ark (Doubao), Xiaomi MiMo, Aliyun Bailian (Qwen) |
-| Local & self-hosted | Ollama, LiteLLM |
-| Custom | Any Anthropic-compatible or OpenAI-compatible endpoint |
-| Media | Google Gemini (image generation) |
+| Local & self-hosted  | Ollama, LiteLLM                                                                                                         |
+| Custom               | Any Anthropic-compatible or OpenAI-compatible endpoint                                                                  |
+| Media                | Google Gemini (image generation)                                                                                        |
 
 ### Beyond coding — a full AI agent
 
@@ -83,13 +82,13 @@ CodePilot started as a coding tool but has grown into a **general-purpose AI age
 
 ### Path B: Build from source (developers)
 
-| Prerequisite | Minimum version |
-|---|---|
-| Node.js | 18+ |
-| npm | 9+ (ships with Node 18) |
+| Prerequisite | Minimum version         |
+| ------------ | ----------------------- |
+| Node.js      | 18+                     |
+| npm          | 9+ (ships with Node 18) |
 
 ```bash
-git clone https://github.com/op7418/CodePilot.git
+git clone https://github.com/erbanku/CodePilot.git
 cd CodePilot
 npm install
 npm run dev              # browser mode at http://localhost:3000
@@ -103,41 +102,41 @@ npm run electron:dev     # full desktop app
 
 ### Conversation & Interaction
 
-| Capability | Details |
-|---|---|
-| Interaction modes | Code / Plan / Ask |
-| Reasoning effort | Low / Medium / High / Max + Thinking mode |
-| Permission control | Default / Full Access, per-action approval |
-| Session control | Pause, resume, rewind to checkpoint, archive |
-| Model switching | Change model mid-conversation |
-| Split screen | Side-by-side dual sessions |
-| Attachments | Files and images with multimodal vision support |
-| Slash commands | /help /clear /cost /compact /doctor /review and more |
+| Capability         | Details                                              |
+| ------------------ | ---------------------------------------------------- |
+| Interaction modes  | Code / Plan / Ask                                    |
+| Reasoning effort   | Low / Medium / High / Max + Thinking mode            |
+| Permission control | Default / Full Access, per-action approval           |
+| Session control    | Pause, resume, rewind to checkpoint, archive         |
+| Model switching    | Change model mid-conversation                        |
+| Split screen       | Side-by-side dual sessions                           |
+| Attachments        | Files and images with multimodal vision support      |
+| Slash commands     | /help /clear /cost /compact /doctor /review and more |
 
 ### Extensions & Integrations
 
-| Capability | Details |
-|---|---|
-| Providers | 17+ providers: Anthropic, OpenRouter, Bedrock, Vertex, Zhipu GLM, Kimi, Moonshot, MiniMax, Volcengine, MiMo, Bailian, Ollama, LiteLLM, custom endpoints |
-| MCP servers | stdio / sse / http, runtime status monitoring |
-| Skills | Custom / project / global skills, skills.sh marketplace |
-| Bridge | Telegram / Feishu / Discord / QQ / WeChat remote control |
-| CLI import | Import Claude Code CLI .jsonl session history |
-| Image generation | Gemini image gen, batch tasks, gallery |
+| Capability       | Details                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Providers        | 17+ providers: Anthropic, OpenRouter, Bedrock, Vertex, Zhipu GLM, Kimi, Moonshot, MiniMax, Volcengine, MiMo, Bailian, Ollama, LiteLLM, custom endpoints |
+| MCP servers      | stdio / sse / http, runtime status monitoring                                                                                                           |
+| Skills           | Custom / project / global skills, skills.sh marketplace                                                                                                 |
+| Bridge           | Telegram / Feishu / Discord / QQ / WeChat remote control                                                                                                |
+| CLI import       | Import Claude Code CLI .jsonl session history                                                                                                           |
+| Image generation | Gemini image gen, batch tasks, gallery                                                                                                                  |
 
 ### Data & Workspace
 
-| Capability | Details |
-|---|---|
+| Capability          | Details                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
 | Assistant Workspace | Persona files (soul.md, user.md, claude.md, memory.md), onboarding, daily check-ins, persistent memory |
-| Generative UI | AI-created interactive dashboards and visual widgets |
-| File browser | Project file tree with syntax-highlighted preview |
-| Git panel | Status, branches, commits, worktree management |
-| Usage analytics | Token counts, cost estimates, daily usage charts |
-| Task scheduler | Cron-based and interval scheduling with persistence |
-| Local storage | SQLite (WAL mode), all data stays on your machine |
-| i18n | English + Chinese |
-| Themes | Dark / Light, one-click toggle |
+| Generative UI       | AI-created interactive dashboards and visual widgets                                                   |
+| File browser        | Project file tree with syntax-highlighted preview                                                      |
+| Git panel           | Status, branches, commits, worktree management                                                         |
+| Usage analytics     | Token counts, cost estimates, daily usage charts                                                       |
+| Task scheduler      | Cron-based and interval scheduling with persistence                                                    |
+| Local storage       | SQLite (WAL mode), all data stays on your machine                                                      |
+| i18n                | English + Chinese                                                                                      |
+| Themes              | Dark / Light, one-click toggle                                                                         |
 
 ---
 
@@ -163,9 +162,11 @@ macOS builds are code-signed with a Developer ID certificate but not notarized, 
 **Option 2** -- System Settings > Privacy & Security > scroll to Security > click Open Anyway.
 
 **Option 3** -- Run in Terminal:
+
 ```bash
 xattr -cr /Applications/CodePilot.app
 ```
+
 </details>
 
 <details>
@@ -174,6 +175,7 @@ xattr -cr /Applications/CodePilot.app
 **Option 1** -- Click "More info" on the SmartScreen dialog, then "Run anyway".
 
 **Option 2** -- Settings > Apps > Advanced app settings > set App Install Control to allow apps from anywhere.
+
 </details>
 
 ---
@@ -183,11 +185,13 @@ xattr -cr /Applications/CodePilot.app
 📖 **Full documentation:** [English](https://www.codepilot.sh/docs) | [中文](https://www.codepilot.sh/zh/docs)
 
 **Getting started:**
+
 - [Quick Start](#quick-start) -- Download or build from source
 - [First Launch](#first-launch) -- Provider setup, workspace configuration
 - [Installation Guide](https://www.codepilot.sh/docs/installation) -- Detailed setup instructions
 
 **User guides:**
+
 - [Providers](https://www.codepilot.sh/docs/providers) -- Configuring AI providers and custom endpoints
 - [MCP Servers](https://www.codepilot.sh/docs/mcp) -- Adding and managing Model Context Protocol servers
 - [Skills](https://www.codepilot.sh/docs/skills) -- Custom skills, project skills, and the skills.sh marketplace
@@ -196,6 +200,7 @@ xattr -cr /Applications/CodePilot.app
 - [FAQ](https://www.codepilot.sh/docs/faq) -- Common issues and solutions
 
 **Developer docs:**
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md) -- Architecture, tech stack, directory structure, data flow
 - [docs/handover/](./docs/handover/) -- Design decisions and handover documents
 - [docs/exec-plans/](./docs/exec-plans/) -- Execution plans and tech debt tracker
@@ -208,30 +213,35 @@ xattr -cr /Applications/CodePilot.app
 <summary>Do I need the Claude Code CLI?</summary>
 
 No. You can use CodePilot with any supported provider (OpenRouter, Zhipu GLM, Volcengine, Ollama, etc.) without the Claude Code CLI. The CLI is only needed if you want Claude to directly edit files, run terminal commands, or use git operations on your machine. For chat and assistant features, just configure a provider and start a conversation.
+
 </details>
 
 <details>
 <summary>Configured a Provider but no models appear</summary>
 
 Verify the API key is valid and the endpoint is reachable. Some providers (Bedrock, Vertex) require additional environment variables or IAM configuration beyond the API key. Use the built-in diagnostics (**Settings > Providers > Run Diagnostics**) to check connectivity.
+
 </details>
 
 <details>
 <summary>What is the difference between <code>npm run dev</code> and <code>npm run electron:dev</code>?</summary>
 
 `npm run dev` starts only the Next.js dev server -- you use CodePilot in your browser at `http://localhost:3000`. `npm run electron:dev` starts both Next.js and the Electron shell, giving you the full desktop app experience with native window controls.
+
 </details>
 
 <details>
 <summary>Where are the Assistant Workspace files?</summary>
 
 When you set up a workspace, CodePilot creates four Markdown files at the **workspace root directory**: `soul.md` (personality), `user.md` (user profile), `claude.md` (rules), and `memory.md` (long-term notes). State tracking (onboarding progress, check-in dates) is stored in the `.assistant/` subdirectory. Daily memories go to `memory/daily/`.
+
 </details>
 
 <details>
 <summary>Bridge requires additional setup per platform</summary>
 
 Each Bridge channel (Telegram, Feishu, Discord, QQ, WeChat) requires its own bot token or app credentials. Go to the **Bridge** page in the sidebar to configure channels. You will need to create a bot on the target platform first and provide the token to CodePilot.
+
 </details>
 
 ---
@@ -242,8 +252,8 @@ Each Bridge channel (Telegram, Feishu, Discord, QQ, WeChat) requires its own bot
 
 Scan the QR code to join the WeChat user group for discussions, feedback, and updates.
 
-- [GitHub Issues](https://github.com/op7418/CodePilot/issues) -- Bug reports and feature requests
-- [GitHub Discussions](https://github.com/op7418/CodePilot/discussions) -- Questions and general discussion
+- [GitHub Issues](https://github.com/erbanku/CodePilot/issues) -- Bug reports and feature requests
+- [GitHub Discussions](https://github.com/erbanku/CodePilot/discussions) -- Questions and general discussion
 
 ---
 
@@ -272,6 +282,7 @@ npm run electron:pack:linux    # Linux AppImage, deb, rpm (local build only — 
 **CI/CD:** Pushing a `v*` tag builds the macOS and Windows packages and creates a GitHub Release automatically. Linux is not part of the release build — build it locally with `npm run electron:pack:linux`.
 
 **Notes:**
+
 - Electron forks a Next.js standalone server on `127.0.0.1` with a random free port
 - Chat data is stored in `~/.codepilot/codepilot.db` (dev mode: `./data/`)
 - SQLite uses WAL mode for fast concurrent reads
@@ -284,5 +295,5 @@ npm run electron:pack:linux    # Linux AppImage, deb, rpm (local build only — 
 [Business Source License 1.1 (BSL-1.1)](LICENSE)
 
 - **Personal / academic / non-profit use**: free and unrestricted
-- **Commercial use**: requires a separate license — contact [@op7418 on X](https://x.com/op7418)
+- **Commercial use**: requires a separate license — contact [@erbanku on X](https://x.com/erbanku)
 - **Change date**: 2029-03-16 — after which the code converts to Apache 2.0

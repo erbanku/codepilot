@@ -61,10 +61,20 @@ function mapSeverity(s: string): "pass" | "warn" | "error" {
 }
 
 /** Transform raw API response to the UI's DiagnosticResult format */
-function transformApiResponse(raw: Record<string, unknown>, isZh: boolean): DiagnosticResult {
-  const overall = mapSeverity(String((raw as { overallSeverity?: string }).overallSeverity || (raw as { overall?: string }).overall || "ok"));
+function transformApiResponse(
+  raw: Record<string, unknown>,
+  isZh: boolean,
+): DiagnosticResult {
+  const overall = mapSeverity(
+    String(
+      (raw as { overallSeverity?: string }).overallSeverity ||
+        (raw as { overall?: string }).overall ||
+        "ok",
+    ),
+  );
 
-  const rawProbes = (raw as { probes?: Array<Record<string, unknown>> }).probes || [];
+  const rawProbes =
+    (raw as { probes?: Array<Record<string, unknown>> }).probes || [];
   const PROBE_NAMES: Record<string, { en: string; zh: string }> = {
     cli: { en: "CLI Health", zh: "CLI 健康" },
     auth: { en: "Auth Source", zh: "鉴权来源" },
@@ -75,24 +85,29 @@ function transformApiResponse(raw: Record<string, unknown>, isZh: boolean): Diag
   };
 
   const probes: Probe[] = rawProbes.map((p) => {
-    const findings = ((p.findings as Array<Record<string, unknown>>) || []).map((f) => {
-      // Parse all repair actions from the finding
-      const rawActions = (f.repairActions as Array<Record<string, unknown>>) || [];
-      const repairs: RepairInfo[] = rawActions.map((a) => ({
-        action: String(a.id || a.action || ""),
-        label: String(a.label || "Fix"),
-        params: (a.params as Record<string, unknown>) || undefined,
-      }));
-      return {
-        severity: mapSeverity(String(f.severity || "ok")),
-        detail: String(f.message || f.detail || f.title || ""),
-        repair: repairs.length > 0 ? repairs[0] : undefined,
-        repairs: repairs.length > 0 ? repairs : undefined,
-      };
-    });
+    const findings = ((p.findings as Array<Record<string, unknown>>) || []).map(
+      (f) => {
+        // Parse all repair actions from the finding
+        const rawActions =
+          (f.repairActions as Array<Record<string, unknown>>) || [];
+        const repairs: RepairInfo[] = rawActions.map((a) => ({
+          action: String(a.id || a.action || ""),
+          label: String(a.label || "Fix"),
+          params: (a.params as Record<string, unknown>) || undefined,
+        }));
+        return {
+          severity: mapSeverity(String(f.severity || "ok")),
+          detail: String(f.message || f.detail || f.title || ""),
+          repair: repairs.length > 0 ? repairs[0] : undefined,
+          repairs: repairs.length > 0 ? repairs : undefined,
+        };
+      },
+    );
     const probeKey = String(p.probe || p.id || p.name || "");
     const probeName = PROBE_NAMES[probeKey]
-      ? (isZh ? PROBE_NAMES[probeKey].zh : PROBE_NAMES[probeKey].en)
+      ? isZh
+        ? PROBE_NAMES[probeKey].zh
+        : PROBE_NAMES[probeKey].en
       : String(p.name || p.probe || probeKey);
     return {
       name: probeName,
@@ -105,8 +120,10 @@ function transformApiResponse(raw: Record<string, unknown>, isZh: boolean): Diag
   const errorCount = probes.filter((p) => p.status === "error").length;
   const warnCount = probes.filter((p) => p.status === "warn").length;
   let conclusion = "All checks passed.";
-  if (errorCount > 0) conclusion = `${errorCount} error(s) found. Check details below.`;
-  else if (warnCount > 0) conclusion = `${warnCount} warning(s) found. Check details below.`;
+  if (errorCount > 0)
+    conclusion = `${errorCount} error(s) found. Check details below.`;
+  else if (warnCount > 0)
+    conclusion = `${warnCount} warning(s) found. Check details below.`;
 
   return { overall, conclusion, probes };
 }
@@ -143,7 +160,9 @@ const STATUS_CONFIG = {
 function StatusBadge({ status }: { status: "pass" | "warn" | "error" }) {
   const cfg = STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${cfg.pillCls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${cfg.pillCls}`}
+    >
       <span className={`size-1.5 rounded-full ${cfg.dotCls}`} />
       {status}
     </span>
@@ -165,7 +184,10 @@ interface ProviderDoctorDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialogProps) {
+export function ProviderDoctorDialog({
+  open,
+  onOpenChange,
+}: ProviderDoctorDialogProps) {
   const { t } = useTranslation();
   const isZh = t("nav.chats") === "对话";
 
@@ -173,7 +195,9 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
   const [result, setResult] = useState<DiagnosticResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedProbes, setExpandedProbes] = useState<Set<number>>(new Set());
-  const [repairingActions, setRepairingActions] = useState<Set<string>>(new Set());
+  const [repairingActions, setRepairingActions] = useState<Set<string>>(
+    new Set(),
+  );
 
   const [liveProbeRunning, setLiveProbeRunning] = useState(false);
   // Monotonic counter to discard stale live probe responses on re-run
@@ -206,16 +230,17 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
       // Live probe runs separately (up to 15s) — appends when done
       setLiveProbeRunning(true);
       fetch("/api/doctor?live=true")
-        .then((r) => r.ok ? r.json() : null)
+        .then((r) => (r.ok ? r.json() : null))
         .then((liveRaw) => {
           // Discard if a newer run started while we were waiting
           if (runId !== diagnosticRunRef.current) return;
           if (!liveRaw) return;
           const liveData = transformApiResponse(liveRaw, isZh);
           // Live probe is the extra probe beyond the fast probes
-          const liveProbe = liveData.probes.length > fastProbeCount
-            ? liveData.probes[liveData.probes.length - 1]
-            : undefined;
+          const liveProbe =
+            liveData.probes.length > fastProbeCount
+              ? liveData.probes[liveData.probes.length - 1]
+              : undefined;
           if (liveProbe) {
             setResult((prev) => {
               if (!prev) return prev;
@@ -223,7 +248,8 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
               if (prev.probes.length > fastProbeCount) return prev;
               const updated = { ...prev, probes: [...prev.probes, liveProbe] };
               if (liveProbe.status === "error") updated.overall = "error";
-              else if (liveProbe.status === "warn" && prev.overall === "pass") updated.overall = "warn";
+              else if (liveProbe.status === "warn" && prev.overall === "pass")
+                updated.overall = "warn";
               return updated;
             });
             if (liveProbe.status !== "pass") {
@@ -269,13 +295,15 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
         }),
       });
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        const errData = await res
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
         throw new Error(errData.error || `Repair failed (${res.status})`);
       }
       // Re-run diagnostics after repair
       await fetchDiagnostics();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Repair action failed');
+      setError(err instanceof Error ? err.message : "Repair action failed");
     } finally {
       setRepairingActions((prev) => {
         const next = new Set(prev);
@@ -322,7 +350,9 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
         {loading && (
           <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
             <SpinnerGap size={16} className="animate-spin" />
-            <span className="text-sm">{isZh ? "正在诊断..." : "Running diagnostics..."}</span>
+            <span className="text-sm">
+              {isZh ? "正在诊断..." : "Running diagnostics..."}
+            </span>
           </div>
         )}
 
@@ -339,10 +369,14 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
             {/* Overall summary */}
             <div className="rounded-md border border-border/50 p-3">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium">{isZh ? "总体状态" : "Overall"}</span>
+                <span className="text-sm font-medium">
+                  {isZh ? "总体状态" : "Overall"}
+                </span>
                 <StatusBadge status={result.overall} />
               </div>
-              <p className="text-xs text-muted-foreground">{result.conclusion}</p>
+              <p className="text-xs text-muted-foreground">
+                {result.conclusion}
+              </p>
             </div>
 
             {/* Probes */}
@@ -357,9 +391,15 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
                       className="flex items-center gap-2 w-full px-3 py-2 h-auto text-left hover:bg-accent/50 rounded-md transition-colors justify-start font-normal"
                       onClick={() => hasFindings && toggleProbe(i)}
                     >
-                      <span className="text-xs text-muted-foreground w-4 shrink-0">[{i + 1}]</span>
+                      <span className="text-xs text-muted-foreground w-4 shrink-0">
+                        [{i + 1}]
+                      </span>
                       {hasFindings ? (
-                        expanded ? <CaretDown size={12} className="shrink-0" /> : <CaretRight size={12} className="shrink-0" />
+                        expanded ? (
+                          <CaretDown size={12} className="shrink-0" />
+                        ) : (
+                          <CaretRight size={12} className="shrink-0" />
+                        )
                       ) : (
                         <span className="w-3 shrink-0" />
                       )}
@@ -372,27 +412,37 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
                           <div key={fi} className="flex items-start gap-2">
                             <FindingIcon severity={finding.severity} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs text-muted-foreground">{finding.detail}</p>
-                              {finding.repairs && finding.repairs.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {finding.repairs.map((repair, ri) => (
-                                    <Button
-                                      key={ri}
-                                      variant="outline"
-                                      size="xs"
-                                      className="text-[11px] h-6"
-                                      disabled={repairingActions.has(repair.action)}
-                                      onClick={() => handleRepair({ ...finding, repair })}
-                                    >
-                                      {repairingActions.has(repair.action) ? (
-                                        <SpinnerGap size={12} className="animate-spin mr-1" />
-                                      ) : null}
-                                      {isZh ? "修复: " : "Fix: "}
-                                      {repair.label}
-                                    </Button>
-                                  ))}
-                                </div>
-                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {finding.detail}
+                              </p>
+                              {finding.repairs &&
+                                finding.repairs.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {finding.repairs.map((repair, ri) => (
+                                      <Button
+                                        key={ri}
+                                        variant="outline"
+                                        size="xs"
+                                        className="text-[11px] h-6"
+                                        disabled={repairingActions.has(
+                                          repair.action,
+                                        )}
+                                        onClick={() =>
+                                          handleRepair({ ...finding, repair })
+                                        }
+                                      >
+                                        {repairingActions.has(repair.action) ? (
+                                          <SpinnerGap
+                                            size={12}
+                                            className="animate-spin mr-1"
+                                          />
+                                        ) : null}
+                                        {isZh ? "修复: " : "Fix: "}
+                                        {repair.label}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                )}
                             </div>
                           </div>
                         ))}
@@ -404,7 +454,9 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
               {liveProbeRunning && (
                 <div className="rounded-md border border-border/30 px-3 py-2 flex items-center gap-2 text-xs text-muted-foreground">
                   <SpinnerGap size={12} className="animate-spin shrink-0" />
-                  {isZh ? "正在运行实际连通性测试..." : "Running live connectivity test..."}
+                  {isZh
+                    ? "正在运行实际连通性测试..."
+                    : "Running live connectivity test..."}
                 </div>
               )}
             </div>
@@ -421,14 +473,14 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
                   : "如果您仍然遇到问题，"}
                 请先点击「导出日志」，然后前往{" "}
                 <a
-                  href="https://github.com/op7418/CodePilot/issues"
+                  href="https://github.com/erbanku/CodePilot/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline text-foreground hover:no-underline"
                 >
                   GitHub Issues
-                </a>
-                {" "}提交问题报告，并附上导出的日志文件。
+                </a>{" "}
+                提交问题报告，并附上导出的日志文件。
                 <br />
                 📖 查看{" "}
                 <a
@@ -447,14 +499,14 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
                   : "If you're still experiencing problems, "}
                 click &ldquo;Export Logs&rdquo; first, then{" "}
                 <a
-                  href="https://github.com/op7418/CodePilot/issues"
+                  href="https://github.com/erbanku/CodePilot/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline text-foreground hover:no-underline"
                 >
                   open a GitHub Issue
-                </a>
-                {" "}and attach the exported log file.
+                </a>{" "}
+                and attach the exported log file.
                 <br />
                 📖 See the{" "}
                 <a
@@ -471,14 +523,31 @@ export function ProviderDoctorDialog({ open, onOpenChange }: ProviderDoctorDialo
         )}
 
         <DialogFooter>
-          <Button variant="outline" size="sm" onClick={fetchDiagnostics} disabled={loading}>
-            <ArrowClockwise size={14} className={loading ? "animate-spin" : ""} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchDiagnostics}
+            disabled={loading}
+          >
+            <ArrowClockwise
+              size={14}
+              className={loading ? "animate-spin" : ""}
+            />
             {isZh ? "重新检测" : "Re-run"}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={loading || !result}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            disabled={loading || !result}
+          >
             {isZh ? "导出日志" : "Export Logs"}
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+          >
             {isZh ? "关闭" : "Close"}
           </Button>
         </DialogFooter>

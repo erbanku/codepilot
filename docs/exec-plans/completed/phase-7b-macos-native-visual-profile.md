@@ -30,7 +30,7 @@
 
 参考资料：
 
-- Raycast 技术解析本地剪藏：`/Users/op7418/Downloads/深入技术解析：全新 Raycast-A Technical Deep Dive Into the New Raycast.md`
+- Raycast 技术解析本地剪藏：`/Users/erbanku/Downloads/深入技术解析：全新 Raycast-A Technical Deep Dive Into the New Raycast.md`
 - 当前设计规范：[`docs/design.md`](../../design.md)
 - 当前图标体系计划：[`phase-7-icon-system.md`](../completed/phase-7-icon-system.md)（已归档）
 - Electron 入口：`electron/main.ts`
@@ -94,14 +94,14 @@ Apple 在 WWDC 2025 公布 **Liquid Glass** 设计语言，覆盖 iOS 26 / iPadO
 
 ## 状态
 
-| Phase | 内容 | 状态 | 用户结果 |
-|-------|------|------|----------|
-| Phase 0 | macOS HIG + 当前 surface 审计 | ✅ 已完成 | 明确哪些区域能平台化，哪些必须保持共享；见 [`docs/handover/macos-visual-profile.md`](../../handover/macos-visual-profile.md) |
-| Phase 1 | Platform profile 基础设施 | ✅ 已完成 | `data-platform` + `data-platform-style` 落在 `<html>`；`--platform-*` token 层声明 + 默认值 = 产品 token 等价（无视觉 diff）；`docs/design.md` 新增 Token 分类章节；6 个 source-pin 单元测试 |
-| Phase 2 | macOS chrome + material POC | ✅ 主体完成（`1202fef`，Codex round 3 final review 收口；卡片几何后续由 7c 完成）| 5 个壳层 surface 接 token（ChatListPanel / SettingsSidebar / UnifiedTopBar chat 分支 / MessageInput / Popover）+ 空态 topbar + 右侧 WorkspaceSidebar / TabBar / AssistantPanel / FileTreePanel；macOS profile alpha 拉到 48/55/78/72；Electron BrowserWindow `backgroundColor: '#00000000'` + `visualEffectState: 'followWindow'`；body 在 darwin profile 下 `transparent`；traffic light 安全区 + 垂直对齐 token；`electron:dev` 引入 esbuild watch（避免 main.js stale）|
-| Phase 3 | macOS hover / cursor / density 收口 | ❌ 不做（用户 2026-05-29 决定） | — |
-| Phase 4 | macOS 浮层视觉 POC | ❌ 不做（用户 2026-05-29 决定） | — |
-| Phase 5 | CDP / Electron smoke + 文档归档 | ❌ 不做（用户 2026-05-29 决定） | — |
+| Phase   | 内容                                | 状态                                                                              | 用户结果                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------- | ----------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 0 | macOS HIG + 当前 surface 审计       | ✅ 已完成                                                                         | 明确哪些区域能平台化，哪些必须保持共享；见 [`docs/handover/macos-visual-profile.md`](../../handover/macos-visual-profile.md)                                                                                                                                                                                                                                                                                                                                               |
+| Phase 1 | Platform profile 基础设施           | ✅ 已完成                                                                         | `data-platform` + `data-platform-style` 落在 `<html>`；`--platform-*` token 层声明 + 默认值 = 产品 token 等价（无视觉 diff）；`docs/design.md` 新增 Token 分类章节；6 个 source-pin 单元测试                                                                                                                                                                                                                                                                               |
+| Phase 2 | macOS chrome + material POC         | ✅ 主体完成（`1202fef`，Codex round 3 final review 收口；卡片几何后续由 7c 完成） | 5 个壳层 surface 接 token（ChatListPanel / SettingsSidebar / UnifiedTopBar chat 分支 / MessageInput / Popover）+ 空态 topbar + 右侧 WorkspaceSidebar / TabBar / AssistantPanel / FileTreePanel；macOS profile alpha 拉到 48/55/78/72；Electron BrowserWindow `backgroundColor: '#00000000'` + `visualEffectState: 'followWindow'`；body 在 darwin profile 下 `transparent`；traffic light 安全区 + 垂直对齐 token；`electron:dev` 引入 esbuild watch（避免 main.js stale） |
+| Phase 3 | macOS hover / cursor / density 收口 | ❌ 不做（用户 2026-05-29 决定）                                                   | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Phase 4 | macOS 浮层视觉 POC                  | ❌ 不做（用户 2026-05-29 决定）                                                   | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Phase 5 | CDP / Electron smoke + 文档归档     | ❌ 不做（用户 2026-05-29 决定）                                                   | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ## 设计边界
 
@@ -121,24 +121,24 @@ Apple 在 WWDC 2025 公布 **Liquid Glass** 设计语言，覆盖 iOS 26 / iPadO
 
 ### 允许 macOS 化的区域
 
-| 区域 | 例子 | 允许改什么 |
-|------|------|------------|
-| Window chrome | 窗口背景、标题栏、traffic light 附近 | vibrancy、safe area、drag region、背景透明度 |
-| Top bar | `UnifiedTopBar` | 材质、边界、hover 强度、标题栏空间 |
-| Left sidebar | `ChatListPanel` / Settings sidebar | 背景材质、分隔线、selected/hover |
-| Right sidebar | `WorkspaceSidebar` / `PanelZone` | 背景材质、分隔线、surface alpha |
-| Composer shell | 输入框外层、底部工具区 | 浮动层阴影、材质、边界 |
-| Popover / Flyout | Model picker、RunCockpit、command menu、tooltip | 背景 alpha、blur fallback、边框、阴影 |
+| 区域             | 例子                                            | 允许改什么                                   |
+| ---------------- | ----------------------------------------------- | -------------------------------------------- |
+| Window chrome    | 窗口背景、标题栏、traffic light 附近            | vibrancy、safe area、drag region、背景透明度 |
+| Top bar          | `UnifiedTopBar`                                 | 材质、边界、hover 强度、标题栏空间           |
+| Left sidebar     | `ChatListPanel` / Settings sidebar              | 背景材质、分隔线、selected/hover             |
+| Right sidebar    | `WorkspaceSidebar` / `PanelZone`                | 背景材质、分隔线、surface alpha              |
+| Composer shell   | 输入框外层、底部工具区                          | 浮动层阴影、材质、边界                       |
+| Popover / Flyout | Model picker、RunCockpit、command menu、tooltip | 背景 alpha、blur fallback、边框、阴影        |
 
 ### 不允许 macOS 化的区域
 
-| 区域 | 原因 |
-|------|------|
-| Chat message body | 内容阅读优先，不能用材质影响可读性 |
-| CodeBlock / Terminal | 对比度和等宽渲染优先 |
-| Settings 表单内容 | 产品一致性优先 |
-| Provider / Models / Runtime 卡片结构 | 三层心智模型必须跨平台一致 |
-| Widget / Artifact / Markdown 内容 | 用户产物必须忠实呈现 |
+| 区域                                 | 原因                               |
+| ------------------------------------ | ---------------------------------- |
+| Chat message body                    | 内容阅读优先，不能用材质影响可读性 |
+| CodeBlock / Terminal                 | 对比度和等宽渲染优先               |
+| Settings 表单内容                    | 产品一致性优先                     |
+| Provider / Models / Runtime 卡片结构 | 三层心智模型必须跨平台一致         |
+| Widget / Artifact / Markdown 内容    | 用户产物必须忠实呈现               |
 
 ## 详细阶段
 
@@ -181,16 +181,16 @@ Apple 在 WWDC 2025 公布 **Liquid Glass** 设计语言，覆盖 iOS 26 / iPadO
 
 下表把每个 surface 的 HIG material 语义和当前可用的实现方式分开，不要混为一谈：
 
-| Surface | HIG material 语义 | 当前可用实现 |
-|---------|------------------|--------------|
-| 主窗口背景 / Left sidebar 区域 | Sidebar | **Electron 窗口级 vibrancy**（整窗只能选一个值，Phase 2 POC 在 `'sidebar'` / `'under-window'` / `'content'` 中决定） |
-| Top bar (`UnifiedTopBar`) | Header / Title bar | **CSS platform token 模拟**（`--platform-surface-bar`、透明度、border） + Electron `titleBarStyle: 'hiddenInset'` 保留 safe area |
-| Right sidebar (`WorkspaceSidebar` / `PanelZone`) | Sidebar | **CSS platform token 模拟**（沿用窗口级 vibrancy 透出的底材质 + 自己叠半透 surface） |
-| Popover / Dropdown / Model picker | Popover | **CSS platform token 模拟**（`--platform-surface-popover` + `backdrop-filter` fallback + 边框 + 阴影）。仅在改造为独立 BrowserWindow 时才能用 Electron `'popover'` |
-| Slash command / Command menu | Menu | **CSS platform token 模拟**（`--platform-surface-popover` 复用，可加独立 `--platform-surface-menu`）。同上 |
-| RunCockpit 临时浮层 | HUD | **CSS platform token 模拟**（`--platform-surface-hud`：更深背景 + 更强阴影）。同上 |
-| Tooltip | Tooltip | **CSS platform token 模拟**（`--platform-surface-tooltip`）。同上 |
-| 全窗口 base 背景 | Under-window | **Electron 窗口级 vibrancy** —— 可选 `'under-window'`，但与 sidebar 候选互斥（只能选一个） |
+| Surface                                          | HIG material 语义  | 当前可用实现                                                                                                                                                       |
+| ------------------------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 主窗口背景 / Left sidebar 区域                   | Sidebar            | **Electron 窗口级 vibrancy**（整窗只能选一个值，Phase 2 POC 在 `'sidebar'` / `'under-window'` / `'content'` 中决定）                                               |
+| Top bar (`UnifiedTopBar`)                        | Header / Title bar | **CSS platform token 模拟**（`--platform-surface-bar`、透明度、border） + Electron `titleBarStyle: 'hiddenInset'` 保留 safe area                                   |
+| Right sidebar (`WorkspaceSidebar` / `PanelZone`) | Sidebar            | **CSS platform token 模拟**（沿用窗口级 vibrancy 透出的底材质 + 自己叠半透 surface）                                                                               |
+| Popover / Dropdown / Model picker                | Popover            | **CSS platform token 模拟**（`--platform-surface-popover` + `backdrop-filter` fallback + 边框 + 阴影）。仅在改造为独立 BrowserWindow 时才能用 Electron `'popover'` |
+| Slash command / Command menu                     | Menu               | **CSS platform token 模拟**（`--platform-surface-popover` 复用，可加独立 `--platform-surface-menu`）。同上                                                         |
+| RunCockpit 临时浮层                              | HUD                | **CSS platform token 模拟**（`--platform-surface-hud`：更深背景 + 更强阴影）。同上                                                                                 |
+| Tooltip                                          | Tooltip            | **CSS platform token 模拟**（`--platform-surface-tooltip`）。同上                                                                                                  |
+| 全窗口 base 背景                                 | Under-window       | **Electron 窗口级 vibrancy** —— 可选 `'under-window'`，但与 sidebar 候选互斥（只能选一个）                                                                         |
 
 **Phase 2 关键决策**：整窗 vibrancy 只能选一个值。先验证当前 `'sidebar'` 是否合适；如果觉得整窗 sidebar 太"侧栏化"了，就换 `'under-window'` 或 `'content'`。这是 Phase 2 POC 截图驱动的决策，文档里只列候选，不预先指定结果。
 
@@ -270,7 +270,7 @@ Apple 在 WWDC 2025 公布 **Liquid Glass** 设计语言，覆盖 iOS 26 / iPadO
   - `/plugins`
 - **light + dark 两套截图**，与 Phase 0 baseline 同名对照（`docs/exec-plans/active/_smoke-evidence/phase-7b/phase2/{page}-{appearance}.png`）。
 - 截图确认 traffic light safe area 不遮挡。
-- Console 无 *新增* error / warn（视觉改造层面）。注：`/api/providers/codex_account/models?all=1` 在某些会话条件下会返回 404 — 这是 Codex Account 虚拟 provider 的既有问题，跟 Phase 7b 视觉无关，需要单独 slice 处理，不阻塞本 Phase 验收。
+- Console 无 _新增_ error / warn（视觉改造层面）。注：`/api/providers/codex_account/models?all=1` 在某些会话条件下会返回 404 — 这是 Codex Account 虚拟 provider 的既有问题，跟 Phase 7b 视觉无关，需要单独 slice 处理，不阻塞本 Phase 验收。
 - 不影响 web dev server 预览：非 Electron 环境 fallback 正常。
 - 验证 Liquid Glass "hierarchy through depth" 原则：chrome / nav / popover 之间能看出明显层次，不是"一坨均匀玻璃"。
 
@@ -357,10 +357,10 @@ Apple 在 WWDC 2025 公布 **Liquid Glass** 设计语言，覆盖 iOS 26 / iPadO
 
 ## Smoke Ledger（真实凭据 / UI / E2E 验证记录）
 
-| Date | Runtime | Provider | Model | 凭据形态 | 场景 | Result | Evidence |
-|------|---------|----------|-------|---------|------|--------|----------|
-| 2026-05-22 | n/a | n/a | n/a | n/a | Phase 0 renderer baseline: `/chat`, `/settings/runtime`, `/settings/assistant`, `/plugins` light + dark | ✅ | `docs/exec-plans/active/_smoke-evidence/phase-7b/baseline/{chat,settings-runtime,settings-assistant,plugins}-{light,dark}.png`; console: no errors introduced by this round (preexisting 404 on `/api/providers/codex_account/models?all=1` unchanged) |
-| 2026-05-26 | n/a | n/a | n/a | n/a | Phase 2 macOS chrome / material 收口（卡片几何走 7c）：Electron diag `dataPlatform=darwin` / `dataShell=electron` / `opaqueElementCount=0` | ✅ | 见 7c 验收：[`handover/macos-visual-profile.md`](../../handover/macos-visual-profile.md) Phase 7c 章节 + `_smoke-evidence/phase-7c-{light,dark}.png`。**注**：该组截图为 browser 模拟 darwin profile（手动注入 `.dark` class），非真实 Electron 窗口 vibrancy 截图；Phase 5 收口仍需补一次真实 Electron-window material smoke |
+| Date       | Runtime | Provider | Model | 凭据形态 | 场景                                                                                                                                       | Result | Evidence                                                                                                                                                                                                                                                                                                                      |
+| ---------- | ------- | -------- | ----- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-22 | n/a     | n/a      | n/a   | n/a      | Phase 0 renderer baseline: `/chat`, `/settings/runtime`, `/settings/assistant`, `/plugins` light + dark                                    | ✅     | `docs/exec-plans/active/_smoke-evidence/phase-7b/baseline/{chat,settings-runtime,settings-assistant,plugins}-{light,dark}.png`; console: no errors introduced by this round (preexisting 404 on `/api/providers/codex_account/models?all=1` unchanged)                                                                        |
+| 2026-05-26 | n/a     | n/a      | n/a   | n/a      | Phase 2 macOS chrome / material 收口（卡片几何走 7c）：Electron diag `dataPlatform=darwin` / `dataShell=electron` / `opaqueElementCount=0` | ✅     | 见 7c 验收：[`handover/macos-visual-profile.md`](../../handover/macos-visual-profile.md) Phase 7c 章节 + `_smoke-evidence/phase-7c-{light,dark}.png`。**注**：该组截图为 browser 模拟 darwin profile（手动注入 `.dark` class），非真实 Electron 窗口 vibrancy 截图；Phase 5 收口仍需补一次真实 Electron-window material smoke |
 
 ## 决策日志
 
