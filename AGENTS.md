@@ -74,4 +74,9 @@ CodePilot — Codex 的桌面 GUI 客户端，基于 Electron + Next.js。
 - `GET /api/app/updates` fetches `https://api.github.com/repos/erbanku/codepilot/releases/latest` (5 min revalidate).
 - Compares `tag_name` vs `NEXT_PUBLIC_APP_VERSION` from `package.json`; native Electron auto-updater is disabled.
 
+## README (2026-07-11)
+
+- Root `README.md` is short: product one-liner, download table, quick start, feature bullets, docs/contrib/license links.
+- No hero screenshot or WeChat QR in README / README_CN / README_JA.
+
 Last updated: 2026-07-11

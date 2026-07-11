@@ -4,6 +4,7 @@
 
 ## 07/11/2026
 
+- docs: simplify README (drop screenshot / WeChat QR); trim EN to title / what / run
 - fix(updates): app update check now queries `erbanku/codepilot` GitHub Releases instead of `op7418/CodePilot`
 - fix(runtime): Conflict check toggle (default off) now also suppresses Claude CLI multi-install scan/warnings in `/api/claude-status`, not only the preference-vs-actual drift banner (PR #5 gap)
 - fix(platform): dedupe npm/bun wrapper vs `node_modules/@anthropic-ai/claude-code` realpath as one install (#623 false positive)

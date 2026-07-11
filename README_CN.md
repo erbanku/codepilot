@@ -10,8 +10,6 @@
 
 [English](./README.md) | [日本語](./README_JA.md)
 
-![CodePilot](https://github.com/user-attachments/assets/9750450a-9f6f-49ce-acd4-c623a4e24281)
-
 ---
 
 [下载](#下载) | [快速开始](#快速开始) | [文档](#文档) | [贡献](#贡献) | [社区](#社区)
@@ -245,10 +243,6 @@ xattr -cr /Applications/CodePilot.app
 ---
 
 ## 社区
-
-<img src="docs/wechat-group-qr.png" width="240" alt="微信用户群二维码" />
-
-扫描二维码加入微信用户群，交流使用心得、反馈问题和获取最新动态。
 
 - [GitHub Issues](https://github.com/erbanku/CodePilot/issues) -- Bug 反馈和功能建议
 - [GitHub Discussions](https://github.com/erbanku/CodePilot/discussions) -- 提问和讨论

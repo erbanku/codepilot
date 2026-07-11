@@ -10,8 +10,6 @@
 
 [English](./README.md) | [中文文档](./README_CN.md)
 
-![CodePilot](https://github.com/user-attachments/assets/9750450a-9f6f-49ce-acd4-c623a4e24281)
-
 ---
 
 [ダウンロード](#ダウンロード) | [クイックスタート](#クイックスタート) | [ドキュメント](#ドキュメント) | [コントリビュート](#コントリビュート) | [コミュニティ](#コミュニティ)
