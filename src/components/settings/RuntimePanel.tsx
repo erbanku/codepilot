@@ -1226,7 +1226,7 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
               can turn it back on here. */}
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-[11px] text-muted-foreground">
-              {isZh ? "冲突检测提示" : "Conflict check"}
+              {isZh ? "冲突检测" : "Conflict check"}
             </span>
             <Switch
               checked={conflictCheckEnabled}
