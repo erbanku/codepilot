@@ -18,6 +18,9 @@ const ALLOWED_KEYS = [
   'default_panel',
   'agent_runtime',
   'cli_enabled',
+  // Off by default — the "stored preference vs actual runtime" drift
+  // warning banner on Settings → Runtime is opt-in noise for most users.
+  'runtime_conflict_check_enabled',
   // Feature announcement dismiss flags (persist across Electron restarts)
   'codepilot:announcement:v0.48-agent-engine',
 ];
