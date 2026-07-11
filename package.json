@@ -1,6 +1,6 @@
 {
     "name": "codepilot",
-    "version": "0.58.1",
+    "version": "0.59.0",
     "private": true,
     "license": "BUSL-1.1",
     "workspaces": [
@@ -114,6 +114,7 @@
         "trash": "^10.1.1",
         "use-stick-to-bottom": "^1.1.2",
         "uuid": "^13.0.0",
+        "webdav": "^5.10.0",
         "ws": "^8.19.0",
         "zlib-sync": "^0.1.10"
     },

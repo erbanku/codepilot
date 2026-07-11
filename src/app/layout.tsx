@@ -8,6 +8,7 @@ import { IconProvider } from "@/components/layout/IconProvider";
 import { AppShell } from "@/components/layout/AppShell";
 import { getAllThemeFamilies, getThemeFamilyMetas } from "@/lib/theme/loader";
 import { renderThemeFamilyCSS } from "@/lib/theme/render-css";
+import { renderFontCSS } from "@/lib/theme/render-font-css";
 import { getSetting } from "@/lib/db";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
   const families = getAllThemeFamilies();
   const familiesMeta = getThemeFamilyMetas();
   const themeFamilyCSS = renderThemeFamilyCSS(families);
+  const fontCSS = renderFontCSS();
   const validIds = families.map((f) => f.id);
 
   // Read theme preferences from DB (persisted across sessions).
@@ -76,6 +78,7 @@ export default function RootLayout({
           <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(!localStorage.getItem('theme')){localStorage.setItem('theme',${JSON.stringify(dbThemeMode)})}}catch(e){}})();` }} />
         )}
         <style id="theme-family-vars" dangerouslySetInnerHTML={{ __html: themeFamilyCSS }} />
+        {fontCSS && <style id="font-vars" dangerouslySetInnerHTML={{ __html: fontCSS }} />}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

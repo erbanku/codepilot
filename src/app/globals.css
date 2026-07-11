@@ -397,6 +397,9 @@ html.dark[data-platform="darwin"][data-shell="electron"][data-platform-style="au
   body {
     @apply bg-background text-foreground;
   }
+  pre, code, kbd, samp {
+    font-size: var(--font-size-code, 13px);
+  }
 
   /* macOS profile lets Electron `vibrancy: 'sidebar'` actually surface
      in the UI. Without making body transparent, the opaque

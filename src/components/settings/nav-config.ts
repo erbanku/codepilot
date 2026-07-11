@@ -31,6 +31,7 @@ export type SettingsSection =
   | "assistant"
   | "tasks"
   | "bridge"
+  | "backup"
   | "about";
 
 export interface SettingsNavItem {
@@ -64,6 +65,7 @@ export const SETTINGS_NAV_ITEMS: SettingsNavItem[] = [
   { id: "tasks", label: "Tasks", icon: "task", href: "/settings/tasks", i18nKey: "settings.tasks" as TranslationKey },
   // Bridge moved from top-level rail entry into Settings (2026-05-02).
   { id: "bridge", label: "Bridge", icon: "bridge", href: "/settings/bridge", i18nKey: "settings.bridge" as TranslationKey },
+  { id: "backup", label: "Backup & Sync", icon: "upload_cloud", href: "/settings/backup", i18nKey: "settings.backup" as TranslationKey },
   { id: "about", label: "About", icon: "about", href: "/settings/about", i18nKey: "settings.about" as TranslationKey },
 ];
 

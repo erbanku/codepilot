@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   CaretDown,
   CaretRight,
+  List,
+  X,
 } from "@/components/ui/icon";
 import { CodePilotIcon, type CodePilotIconName } from "@/components/ui/semantic-icon";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,7 @@ import { AssistantPromoCard } from "@/components/chat/ChatEmptyState";
 import {
   formatRelativeTime,
   groupSessionsByProject,
+  groupSessionsByTime,
   loadCollapsedProjects,
   saveCollapsedProjects,
   COLLAPSED_INITIALIZED_KEY,
@@ -75,6 +78,14 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
   const [projectListExpanded, setProjectListExpanded] = useState(false);
   const PROJECT_LIST_TRUNCATE_LIMIT = 10;
   const { workspacePath } = useAssistantWorkspace();
+  // Time section collapse state for assistant section — default collapsed
+  const [collapsedTimeSections, setCollapsedTimeSections] = useState<Set<string>>(
+    () => new Set(["today", "last7days", "last30days", "older"])
+  );
+  // Bulk selection mode
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
   const [assistantSummary, setAssistantSummary] = useState<{
     name: string;
     memoryCount: number;
@@ -320,6 +331,88 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
     }
   };
 
+  const handleArchiveSession = async (sessionId: string) => {
+    try {
+      const res = await fetch(`/api/chat/sessions/${sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "archived" }),
+      });
+      if (res.ok) {
+        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+        if (pathname === `/chat/${sessionId}`) {
+          router.push("/chat");
+        }
+      }
+    } catch {
+      // Silently fail
+    }
+  };
+
+  const toggleSessionSelection = useCallback((sessionId: string) => {
+    setSelectedSessionIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) {
+        next.delete(sessionId);
+      } else {
+        next.add(sessionId);
+      }
+      return next;
+    });
+  }, []);
+
+  const cancelSelection = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedSessionIds(new Set());
+  }, []);
+
+  const handleBulkAction = useCallback(async (action: "archive" | "delete") => {
+    const ids = Array.from(selectedSessionIds);
+    if (ids.length === 0) return;
+
+    const confirmMsg = action === "delete"
+      ? t("chatList.bulkDeleteConfirm" as TranslationKey, { count: ids.length })
+      : t("chatList.bulkArchiveConfirm" as TranslationKey, { count: ids.length });
+    if (!confirm(confirmMsg)) return;
+
+    setBulkProcessing(true);
+    try {
+      const res = await fetch("/api/chat/sessions/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ids }),
+      });
+      if (res.ok) {
+        if (action === "delete") {
+          setSessions((prev) => prev.filter((s) => !selectedSessionIds.has(s.id)));
+          // Remove from split group
+          for (const sid of ids) {
+            if (isInSplit(sid)) removeFromSplit(sid);
+          }
+          if (pathname?.startsWith("/chat/")) {
+            const currentId = pathname.split("/chat/")[1];
+            if (selectedSessionIds.has(currentId)) {
+              router.push("/chat");
+            }
+          }
+        } else {
+          // Archive — remove from visible list (only active sessions shown)
+          setSessions((prev) => prev.filter((s) => !selectedSessionIds.has(s.id)));
+        }
+        cancelSelection();
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setBulkProcessing(false);
+    }
+  }, [selectedSessionIds, t, isInSplit, removeFromSplit, pathname, router, cancelSelection]);
+
+  const enterSelectionMode = useCallback(() => {
+    setSelectionMode(true);
+    setSelectedSessionIds(new Set());
+  }, []);
+
   const handleRemoveProject = async (workingDirectory: string) => {
     if (!confirm(`Remove project "${workingDirectory.split('/').pop()}" and all its conversations?`)) return;
     const projectSessions = sessions.filter((s) => s.working_directory === workingDirectory);
@@ -448,6 +541,7 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
       <div className="p-2">
         <div className="flex flex-col gap-0.5">
           {/* New chat — list option (no shortcut bound currently) */}
+          {!selectionMode && (
           <Button
             variant="ghost"
             size="sm"
@@ -458,8 +552,10 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
             <CodePilotIcon name="chat" size="md" className="text-inherit" aria-hidden />
             {t('chatList.newConversation')}
           </Button>
+          )}
 
           {/* Search — list option with ⌘K shortcut on hover */}
+          {!selectionMode && (
           <Button
             variant="ghost"
             size="sm"
@@ -472,9 +568,10 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
               ⌘K
             </kbd>
           </Button>
+          )}
 
           {/* Feature pages */}
-          {navItems.map((item) => {
+          {!selectionMode && navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link key={item.href} href={item.href}>
@@ -493,6 +590,46 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
               </Link>
             );
           })}
+
+          {/* Select sessions button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 h-9 px-3 rounded-xl text-[13px] font-normal text-sidebar-foreground"
+            onClick={selectionMode ? cancelSelection : enterSelectionMode}
+          >
+            {selectionMode ? <X size={16} /> : <List size={16} />}
+            {selectionMode ? t('chatList.cancelSelection' as TranslationKey) : t('chatList.selectSessions' as TranslationKey)}
+          </Button>
+
+          {/* Selection mode action bar */}
+          {selectionMode && (
+            <div className="flex items-center gap-1 mt-1 px-1">
+              <span className="text-[11px] text-muted-foreground flex-1">
+                {t('chatList.selectionCount' as TranslationKey, { count: selectedSessionIds.size })}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-[11px] rounded-lg text-sidebar-foreground hover:bg-sidebar-accent"
+                disabled={selectedSessionIds.size === 0 || bulkProcessing}
+                onClick={() => handleBulkAction("archive")}
+              >
+                <CodePilotIcon name="archive" size="sm" className="mr-1" aria-hidden />
+                {t('chatList.archiveSelected' as TranslationKey)}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-[11px] rounded-lg text-destructive hover:bg-destructive/10"
+                disabled={selectedSessionIds.size === 0 || bulkProcessing}
+                onClick={() => handleBulkAction("delete")}
+              >
+                <CodePilotIcon name="delete" size="sm" className="mr-1" aria-hidden />
+                {t('chatList.deleteSelected' as TranslationKey)}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -630,12 +767,16 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
                                         needsApproval={pendingApprovalSessionIds.has(session.id) || pendingApprovalSessionId === session.id}
                                         canSplit={canSplit}
                                         isWorkspace={false}
+                                        selectionMode={selectionMode}
+                                        isSelected={selectedSessionIds.has(session.id)}
+                                        onToggleSelect={toggleSessionSelection}
                                         formatRelativeTime={formatRelativeTime}
                                         t={t}
                                         onMouseEnter={() => setHoveredSession(session.id)}
                                         onMouseLeave={() => setHoveredSession(null)}
                                         onDelete={handleDeleteSession}
                                         onRename={handleRenameSession}
+                                        onArchive={handleArchiveSession}
                                         onAddToSplit={(s) => addToSplit({
                                           sessionId: s.id,
                                           title: s.title,
@@ -696,16 +837,8 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
           {/* ─── 助理 section ─── */}
           {assistantGroup && (() => {
             const aGroup = assistantGroup;
-            const isAssistantSessionsExpanded = expandedSessionGroups.has(aGroup.workingDirectory);
-            const aShouldTruncate = aGroup.sessions.length > SESSION_TRUNCATE_LIMIT;
-            let aVisibleSessions = aGroup.sessions;
-            if (aShouldTruncate && !isAssistantSessionsExpanded) {
-              const truncated = aGroup.sessions.slice(0, SESSION_TRUNCATE_LIMIT);
-              const activeSession = aGroup.sessions.find(s => pathname === `/chat/${s.id}`);
-              if (activeSession && !truncated.includes(activeSession)) truncated.push(activeSession);
-              aVisibleSessions = truncated;
-            }
-            const aHiddenCount = aGroup.sessions.length - aVisibleSessions.length;
+            const timeGroups = groupSessionsByTime(aGroup.sessions);
+            const totalCount = aGroup.sessions.length;
 
             return (
               <div
@@ -726,10 +859,7 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
                         : <CaretDown size={12} />}
                     </span>
                   </button>
-                  {/* New assistant chat. The assistant has no folder, so this
-                      top-level "写新对话" (pencil) entry is how you start a chat
-                      that belongs to the assistant. Always visible — it's the
-                      assistant's primary action. */}
+                  {!selectionMode && (
                   <Button
                     variant="ghost"
                     size="icon-xs"
@@ -739,6 +869,7 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
                   >
                     <CodePilotIcon name="edit" size="sm" aria-hidden />
                   </Button>
+                  )}
                 </div>
 
                 <AnimatePresence initial={false}>
@@ -751,50 +882,84 @@ export function ChatListPanel({ open, hasUpdate, readyToInstall }: ChatListPanel
                       style={{ overflow: 'hidden' }}
                     >
                       <div className="flex flex-col">
-                        {aVisibleSessions.map((session) => {
-                          const isActive = pathname === `/chat/${session.id}`;
-                          const canSplit = !isActive && !isInSplit(session.id);
+                        {timeGroups.map((tg) => {
+                          const isTimeCollapsed = collapsedTimeSections.has(tg.section);
                           return (
-                            <SessionListItem
-                              key={session.id}
-                              session={session}
-                              isActive={isActive}
-                              isHovered={hoveredSession === session.id}
-                              isDeleting={deletingSession === session.id}
-                              isSessionStreaming={activeStreamingSessions.has(session.id) || streamingSessionId === session.id}
-                              needsApproval={pendingApprovalSessionIds.has(session.id) || pendingApprovalSessionId === session.id}
-                              canSplit={canSplit}
-                              isWorkspace
-                              formatRelativeTime={formatRelativeTime}
-                              t={t}
-                              onMouseEnter={() => setHoveredSession(session.id)}
-                              onMouseLeave={() => setHoveredSession(null)}
-                              onDelete={handleDeleteSession}
-                              onRename={handleRenameSession}
-                              onAddToSplit={(s) => addToSplit({
-                                sessionId: s.id,
-                                title: s.title,
-                                workingDirectory: s.working_directory || "",
-                                projectName: s.project_name || "",
-                                mode: s.mode,
+                          <div key={tg.section}>
+                            <button
+                              type="button"
+                              onClick={() => setCollapsedTimeSections(prev => {
+                                const next = new Set(prev);
+                                if (next.has(tg.section)) next.delete(tg.section);
+                                else next.add(tg.section);
+                                return next;
                               })}
-                            />
-                          );
-                        })}
-                        {aShouldTruncate && (
-                          <button
-                            onClick={() => setExpandedSessionGroups(prev => {
-                              const next = new Set(prev);
-                              if (next.has(aGroup.workingDirectory)) next.delete(aGroup.workingDirectory);
-                              else next.add(aGroup.workingDirectory);
-                              return next;
+                              className="flex w-full items-center gap-1.5 px-3 py-1.5 cursor-pointer select-none rounded-lg transition-colors hover:bg-accent/50"
+                            >
+                              <span className="text-xs font-semibold text-sidebar-foreground/60">
+                                {t(tg.labelKey)}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground/40 tabular-nums">
+                                {tg.sessions.length}
+                              </span>
+                              <span className="ml-auto text-muted-foreground/50">
+                                {isTimeCollapsed
+                                  ? <CaretRight size={10} />
+                                  : <CaretDown size={10} />}
+                              </span>
+                            </button>
+                            <AnimatePresence initial={false}>
+                              {!isTimeCollapsed && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                                  style={{ overflow: 'hidden' }}
+                                >
+                            {tg.sessions.map((session) => {
+                              const isActive = pathname === `/chat/${session.id}`;
+                              const canSplit = !isActive && !isInSplit(session.id);
+                              return (
+                                <SessionListItem
+                                  key={session.id}
+                                  session={session}
+                                  isActive={isActive}
+                                  isHovered={hoveredSession === session.id}
+                                  isDeleting={deletingSession === session.id}
+                                  isSessionStreaming={activeStreamingSessions.has(session.id) || streamingSessionId === session.id}
+                                  needsApproval={pendingApprovalSessionIds.has(session.id) || pendingApprovalSessionId === session.id}
+                                  canSplit={canSplit}
+                                  isWorkspace
+                                  selectionMode={selectionMode}
+                                  isSelected={selectedSessionIds.has(session.id)}
+                                  onToggleSelect={toggleSessionSelection}
+                                  formatRelativeTime={formatRelativeTime}
+                                  t={t}
+                                  onMouseEnter={() => setHoveredSession(session.id)}
+                                  onMouseLeave={() => setHoveredSession(null)}
+                                  onDelete={handleDeleteSession}
+                                  onRename={handleRenameSession}
+                                  onArchive={handleArchiveSession}
+                                  onAddToSplit={(s) => addToSplit({
+                                    sessionId: s.id,
+                                    title: s.title,
+                                    workingDirectory: s.working_directory || "",
+                                    projectName: s.project_name || "",
+                                    mode: s.mode,
+                                  })}
+                                />
+                              );
                             })}
-                            className="w-full py-1.5 pl-3 text-left text-xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
-                          >
-                            {isAssistantSessionsExpanded
-                              ? t('chatList.showLess' as TranslationKey)
-                              : t('chatList.showMore' as TranslationKey, { count: String(aHiddenCount) })}
-                          </button>
+                            </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )})}
+                        {totalCount === 0 && (
+                          <p className="px-3 py-2 text-[11px] text-muted-foreground/50">
+                            {t('chatList.noSessions')}
+                          </p>
                         )}
                       </div>
                     </motion.div>

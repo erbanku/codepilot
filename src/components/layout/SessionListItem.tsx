@@ -7,6 +7,7 @@ import {
   Columns,
   X,
   DotsThree,
+  Check,
 } from "@/components/ui/icon";
 import { CodePilotIcon } from "@/components/ui/semantic-icon";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,10 @@ interface SessionListItemProps {
   canSplit: boolean;
   /** Whether this session belongs to the assistant workspace */
   isWorkspace?: boolean;
+  /** Bulk selection mode */
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (sessionId: string) => void;
   formatRelativeTime: (dateStr: string, t: (key: TranslationKey, params?: Record<string, string | number>) => string) => string;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   onMouseEnter: () => void;
@@ -40,6 +45,7 @@ interface SessionListItemProps {
   onDelete: (e: React.MouseEvent, sessionId: string) => void;
   onRename: (sessionId: string, newTitle: string) => void;
   onAddToSplit: (session: ChatSession) => void;
+  onArchive?: (sessionId: string) => void;
 }
 
 export function SessionListItem({
@@ -51,6 +57,9 @@ export function SessionListItem({
   needsApproval,
   canSplit,
   isWorkspace,
+  selectionMode,
+  isSelected,
+  onToggleSelect,
   formatRelativeTime,
   t,
   onMouseEnter,
@@ -58,6 +67,7 @@ export function SessionListItem({
   onDelete,
   onRename,
   onAddToSplit,
+  onArchive,
 }: SessionListItemProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
@@ -73,6 +83,7 @@ export function SessionListItem({
         href={`/chat/${session.id}`}
         className={cn(
           "flex items-center gap-2 rounded-xl px-3 h-8 transition-all duration-150 min-w-0",
+          selectionMode && "pointer-events-none",
           isWorkspace
             ? isActive
               ? "bg-primary/[0.12] text-sidebar-accent-foreground"
@@ -82,11 +93,30 @@ export function SessionListItem({
               : "text-sidebar-foreground hover:bg-sidebar-accent"
         )}
       >
+        {/* Selection checkbox — shown only in selection mode */}
+        {selectionMode && (
+          <button
+            type="button"
+            className={cn(
+              "relative flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors pointer-events-auto",
+              isSelected
+                ? "bg-primary border-primary text-primary-foreground"
+                : "border-muted-foreground/30 hover:border-muted-foreground/60"
+            )}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleSelect?.(session.id);
+            }}
+          >
+            {isSelected && <Check size={10} weight="bold" />}
+          </button>
+        )}
         {/* Left icon area — streaming/approval indicators.
             Skip empty 14px slot for assistant (workspace) sessions when idle:
             助理 section 是 flat list,无父 folder,空 slot 看着像无意义缩进。
             项目下的会话保留以维持"在 folder 内"的层级感。 */}
-        {(isSessionStreaming || needsApproval || !isWorkspace) && (
+        {!selectionMode && (isSessionStreaming || needsApproval || !isWorkspace) && (
           <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center">
             {isSessionStreaming && (
               <span className="relative flex h-2 w-2">
@@ -106,16 +136,19 @@ export function SessionListItem({
           {session.title}
         </span>
         {/* Right area — fixed width, time or dots swap via opacity */}
-        <span className="shrink-0 w-[38px] flex items-center justify-end">
-          <span className={cn(
-            "text-[11px] text-muted-foreground/40 truncate transition-opacity",
-            showActions ? "opacity-0" : "opacity-100"
-          )}>
-            {formatRelativeTime(session.updated_at, t)}
+        {!selectionMode && (
+          <span className="shrink-0 w-[38px] flex items-center justify-end">
+            <span className={cn(
+              "text-[11px] text-muted-foreground/40 truncate transition-opacity",
+              showActions ? "opacity-0" : "opacity-100"
+            )}>
+              {formatRelativeTime(session.updated_at, t)}
+            </span>
           </span>
-        </span>
+        )}
       </Link>
       {/* Three-dot menu — absolute over the right area */}
+      {!selectionMode && (
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -140,11 +173,6 @@ export function SessionListItem({
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(e) => {
-              // Prevent the default close-menu → focus-trigger behavior.
-              // Radix DropdownMenu tries to restore focus to the trigger
-              // when the menu closes, which fights with the dialog's
-              // autoFocus. Calling preventDefault lets us manage close
-              // independently and open the dialog cleanly.
               e.preventDefault();
               setMenuOpen(false);
               setRenameOpen(true);
@@ -154,13 +182,26 @@ export function SessionListItem({
             <span>{t('chatList.renameConversation' as TranslationKey)}</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => {
-            // v11 fix — see lib/clipboard.ts for why fire-and-forget
-            // writeText fails in Electron renderers post-DropdownMenu blur.
             void copyWithToast({ text: session.id, t });
           }}>
             <CodePilotIcon name="copy" size="sm" aria-hidden />
             <span>{t('chatList.copySessionId' as TranslationKey)}</span>
           </DropdownMenuItem>
+          {onArchive && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setMenuOpen(false);
+                  onArchive(session.id);
+                }}
+              >
+                <CodePilotIcon name="archive" size="sm" aria-hidden />
+                <span>{session.status === 'archived' ? t('chatList.unarchiveConversation' as TranslationKey) : t('chatList.archiveConversation' as TranslationKey)}</span>
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
@@ -171,9 +212,8 @@ export function SessionListItem({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {/* Rename dialog — replaces window.prompt() which is unsupported in
-          Electron renderers (throws TypeError: prompt() is not supported).
-          See docs/exec-plans/active/v0.48-post-release-issues.md §5.6. */}
+      )}
+      {/* Rename dialog */}
       <PromptDialog
         open={renameOpen}
         onOpenChange={setRenameOpen}

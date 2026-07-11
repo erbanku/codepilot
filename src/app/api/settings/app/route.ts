@@ -22,6 +22,11 @@ const ALLOWED_KEYS = [
   // preference-vs-actual drift banner and the multi-install Claude CLI scan
   // in /api/claude-status (otherInstalls + conflict warnings).
   'runtime_conflict_check_enabled',
+  // Font settings
+  'ui_font_family',
+  'code_font_family',
+  'ui_font_size',
+  'code_font_size',
   // Feature announcement dismiss flags (persist across Electron restarts)
   'codepilot:announcement:v0.48-agent-engine',
 ];

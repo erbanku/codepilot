@@ -242,7 +242,7 @@ export function UnifiedTopBar() {
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
           {sessionTitle && (
-            <h2 className="text-sm font-medium text-foreground truncate max-w-[280px]">
+            <h2 className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
               {sessionTitle}
             </h2>
           )}
@@ -253,7 +253,7 @@ export function UnifiedTopBar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 max-w-[200px] px-2 text-xs font-normal text-muted-foreground hover:text-foreground"
+                  className="h-7 max-w-[400px] px-2 text-xs font-normal text-muted-foreground hover:text-foreground"
                   onClick={() => {
                     if (workingDirectory) {
                       if (window.electronAPI?.shell?.openPath) {
@@ -346,7 +346,7 @@ export function UnifiedTopBar() {
                   className="flex h-7 items-center gap-1 rounded-md px-1.5 text-xs text-muted-foreground hover:text-foreground"
                 >
                   <CodePilotIcon name="git" size="md" className="text-inherit" aria-hidden />
-                  <span className="max-w-[100px] truncate">{currentBranch}</span>
+                  <span className="max-w-[400px] truncate">{currentBranch}</span>
                   {gitDirtyCount > 0 && (
                     <span className="flex items-center gap-0.5 text-[11px] text-amber-500">
                       <DotOutline size={10} weight="fill" />

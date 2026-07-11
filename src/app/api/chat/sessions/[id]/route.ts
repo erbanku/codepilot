@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { deleteSession, getSession, updateSessionWorkingDirectory, updateSessionTitle, updateSessionMode, updateSessionModel, updateSessionProviderId, clearSessionMessages, updateSdkSessionId, updateSessionPermissionProfile, updateSessionRuntime } from '@/lib/db';
+import { deleteSession, getSession, updateSessionWorkingDirectory, updateSessionTitle, updateSessionMode, updateSessionModel, updateSessionProviderId, clearSessionMessages, updateSdkSessionId, updateSessionPermissionProfile, updateSessionRuntime, updateSessionStatus } from '@/lib/db';
 import { autoApprovePendingForSession } from '@/lib/bridge/permission-broker';
 import { clearRuntimeSessionRef } from '@/lib/runtime/session-store';
 import { isRuntimeId, RUNTIME_IDS } from '@/lib/runtime/runtime-id';
@@ -36,6 +36,12 @@ export async function PATCH(
 
     if (body.working_directory) {
       updateSessionWorkingDirectory(id, body.working_directory);
+    }
+    if (body.status) {
+      if (body.status !== 'active' && body.status !== 'archived') {
+        return Response.json({ error: 'status must be "active" or "archived"' }, { status: 400 });
+      }
+      updateSessionStatus(id, body.status);
     }
     if (body.title) {
       updateSessionTitle(id, body.title);

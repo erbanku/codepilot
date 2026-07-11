@@ -1696,6 +1696,31 @@ export function updateSessionStatus(id: string, status: 'active' | 'archived'): 
   db.prepare('UPDATE chat_sessions SET status = ? WHERE id = ?').run(status, id);
 }
 
+export function bulkUpdateSessionStatus(ids: string[], status: 'active' | 'archived'): number {
+  const db = getDb();
+  if (ids.length === 0) return 0;
+  const placeholders = ids.map(() => '?').join(',');
+  const result = db.prepare(
+    `UPDATE chat_sessions SET status = ? WHERE id IN (${placeholders})`
+  ).run(status, ...ids);
+  return result.changes;
+}
+
+export function bulkDeleteSessions(ids: string[]): number {
+  const db = getDb();
+  if (ids.length === 0) return 0;
+  const txn = db.transaction(() => {
+    let deleted = 0;
+    for (const id of ids) {
+      db.prepare('DELETE FROM channel_outbound_refs WHERE codepilot_session_id = ?').run(id);
+      const result = db.prepare('DELETE FROM chat_sessions WHERE id = ?').run(id);
+      deleted += result.changes;
+    }
+    return deleted;
+  });
+  return txn();
+}
+
 // ==========================================
 // Task Operations
 // ==========================================
