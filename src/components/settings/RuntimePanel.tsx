@@ -765,10 +765,11 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
           settings: { runtime_conflict_check_enabled: checked ? "true" : "false" },
         }),
       });
-      if (!res.ok) throw new Error("save failed");
-    } catch {
+      if (!res.ok) throw new Error(`Failed to save conflict check setting: ${res.status}`);
+    } catch (err) {
       // Roll back the optimistic flip so the switch doesn't show a
       // state that never made it to disk.
+      console.error("[RuntimePanel] runtime_conflict_check_enabled save failed:", err);
       setConflictCheckEnabled(!checked);
     } finally {
       setConflictCheckSaving(false);
