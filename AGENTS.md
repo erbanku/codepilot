@@ -60,3 +60,12 @@ CodePilot — Codex 的桌面 GUI 客户端，基于 Electron + Next.js。
 - [docs/research/](./docs/research/) — 调研文档
 
 **检索前先读对应目录的 README.md；增删文件后更新索引。**
+
+## Runtime conflict check (2026-07-11)
+
+- App setting `runtime_conflict_check_enabled` (default off / unset = off).
+- **Off:** Settings → Runtime hides preference-vs-actual drift banner; `/api/claude-status` skips `findAllClaudeBinaries` and does not emit `otherInstalls` / "N other Claude CLI installation(s) detected".
+- **On:** drift banner + multi-install scan/warnings enabled; toggle save triggers status refresh.
+- `claudeInstallIdentityKey()` dedupes npm/bun wrapper vs `node_modules/@anthropic-ai/claude-code` as one install.
+
+Last updated: 2026-07-11

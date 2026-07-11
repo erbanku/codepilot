@@ -18,6 +18,10 @@ const ALLOWED_KEYS = [
   'default_panel',
   'agent_runtime',
   'cli_enabled',
+  // Off by default — Settings → Runtime "Conflict check" gates both the
+  // preference-vs-actual drift banner and the multi-install Claude CLI scan
+  // in /api/claude-status (otherInstalls + conflict warnings).
+  'runtime_conflict_check_enabled',
   // Feature announcement dismiss flags (persist across Electron restarts)
   'codepilot:announcement:v0.48-agent-engine',
 ];

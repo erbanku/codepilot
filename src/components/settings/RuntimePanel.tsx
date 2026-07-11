@@ -428,6 +428,12 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
   // only fires for legacy DBs where the two fields drifted apart.
   const [agentRuntime, setAgentRuntime] = useState<AgentRuntime>("claude-code-sdk");
   const [cliEnabled, setCliEnabled] = useState(true);
+  // Off by default: most users never touched `cli_enabled` / stored a
+  // stale `agent_runtime` preference, so the drift banner below is noise
+  // for them. Users who want the "stored preference vs actual runtime"
+  // mismatch surfaced can opt back in with the toggle in this section.
+  const [conflictCheckEnabled, setConflictCheckEnabled] = useState(false);
+  const [conflictCheckSaving, setConflictCheckSaving] = useState(false);
 
   // ── Claude Code status (subprocess detection) ──
   const { status: claudeStatus, refresh: refreshStatus, invalidateAndRefresh } = useClaudeStatus();
@@ -563,6 +569,8 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
         const appData = await appRes.json();
         const appSettings = appData.settings || {};
         setCliEnabled(appSettings.cli_enabled !== "false");
+        // Default off — only "true" turns the drift/conflict warning on.
+        setConflictCheckEnabled(appSettings.runtime_conflict_check_enabled === "true");
         // agent_runtime: 'claude-code-sdk' | 'native'. Migrate legacy 'auto'
         // values in-place — same flow as the legacy CliSettingsSection used.
         const saved = appSettings.agent_runtime;
@@ -743,6 +751,31 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
       window.dispatchEvent(new Event("provider-changed"));
     } catch {
       /* ignore — next user action will refetch */
+    }
+  };
+
+  const handleConflictCheckToggle = async (checked: boolean) => {
+    setConflictCheckSaving(true);
+    setConflictCheckEnabled(checked);
+    try {
+      const res = await fetch("/api/settings/app", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          settings: { runtime_conflict_check_enabled: checked ? "true" : "false" },
+        }),
+      });
+      if (!res.ok) throw new Error(`Failed to save conflict check setting: ${res.status}`);
+      // Re-fetch status so multi-install warnings appear/disappear with the toggle.
+      // /api/claude-status only scans otherInstalls when this setting is "true".
+      refreshStatus();
+    } catch (err) {
+      // Roll back the optimistic flip so the switch doesn't show a
+      // state that never made it to disk.
+      console.error("[RuntimePanel] runtime_conflict_check_enabled save failed:", err);
+      setConflictCheckEnabled(!checked);
+    } finally {
+      setConflictCheckSaving(false);
     }
   };
 
@@ -1192,8 +1225,22 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
           actual reachability (Claude Code: install / OAuth state;
           AI SDK: always ready since it ships in-app). */}
       <div>
-        <div className="mb-2">
+        <div className="mb-2 flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold">{isZh ? "默认引擎" : "Default engine"}</h3>
+          {/* Off by default — gates both the preference-vs-actual drift
+              banner below and the multi-install Claude CLI scan/warnings
+              from /api/claude-status. Turn on when debugging install conflicts. */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <label htmlFor="runtime-conflict-check-toggle" className="text-[11px] text-muted-foreground">
+              {isZh ? "冲突检测" : "Conflict check"}
+            </label>
+            <Switch
+              id="runtime-conflict-check-toggle"
+              checked={conflictCheckEnabled}
+              onCheckedChange={handleConflictCheckToggle}
+              disabled={conflictCheckSaving}
+            />
+          </div>
         </div>
         <p className="text-[11px] text-muted-foreground mb-3">
           {isZh
@@ -1201,7 +1248,7 @@ export function RuntimePanel(props: RuntimePanelProps = {}) {
               + "「默认 Runtime + Provider」重新解析。"
             : "Choose which runtime new chats use by default. Replies already streaming aren't interrupted; every subsequent message re-resolves the default runtime + provider on send."}
         </p>
-        {driftWarning && (
+        {conflictCheckEnabled && driftWarning && (
           // Two distinct reasons can drive this warning, with different
           // recovery paths. Don't conflate them — Runtime is the trust
           // page, getting the *cause* wrong (and pointing at the wrong

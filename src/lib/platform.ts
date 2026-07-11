@@ -171,6 +171,25 @@ export interface ClaudeInstallInfo {
 }
 
 /**
+ * Package-root key for npm/bun global installs.
+ * Wrapper scripts and the real CLI under node_modules/@anthropic-ai/claude-code
+ * must count as one install (#623 false positive).
+ */
+export function claudeInstallIdentityKey(realPath: string): string {
+  const normalized = realPath.replace(/\\/g, '/');
+  const marker = '/node_modules/@anthropic-ai/claude-code';
+  const idx = normalized.toLowerCase().indexOf(marker);
+  if (idx >= 0) {
+    return normalized.slice(0, idx + marker.length).toLowerCase();
+  }
+  // Same directory + basename without executable extensions (Windows wrappers).
+  return path
+    .join(path.dirname(realPath), path.basename(realPath).replace(/\.(exe|cmd|bat)$/i, ''))
+    .replace(/\\/g, '/')
+    .toLowerCase();
+}
+
+/**
  * Detect ALL Claude CLI installations on the system.
  * Used to warn about conflicts when multiple versions coexist.
  */
@@ -184,11 +203,14 @@ export function findAllClaudeBinaries(): ClaudeInstallInfo[] {
       try { realPath = fs.realpathSync(p); } catch { realPath = p; }
       if (seenReal.has(realPath)) return;
 
-      // On Windows, installers create multiple variants in the same directory:
-      // native: claude.exe + claude (shell script), npm: claude.cmd + claude, etc.
-      // Deduplicate by dir + base name stripped of all executable extensions.
-      // Only record the dirKey AFTER --version succeeds, so a broken .cmd
-      // wrapper doesn't hide a working .exe in the same directory.
+      // Deduplicate wrappers that resolve into the same package / dir.
+      // Examples: npm's .cmd shim + real cli.js; native .exe + extensionless script.
+      const identityKey = claudeInstallIdentityKey(realPath);
+      if (seenReal.has(identityKey)) return;
+
+      // On Windows, also key by dir + basename without extensions before
+      // --version, but only record after success so a broken .cmd does not
+      // hide a working .exe in the same directory.
       let winDirKey: string | undefined;
       if (isWindows) {
         winDirKey = path.join(path.dirname(realPath), path.basename(realPath).replace(/\.(exe|cmd|bat)$/i, '')).toLowerCase();
@@ -202,6 +224,7 @@ export function findAllClaudeBinaries(): ClaudeInstallInfo[] {
         encoding: 'utf-8',
       });
       seenReal.add(realPath);
+      seenReal.add(identityKey);
       if (winDirKey) seenReal.add(winDirKey);
       results.push({ path: p, version: out.trim() || null, type: classifyClaudePath(p) });
     } catch {

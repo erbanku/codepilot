@@ -1,4 +1,11 @@
-# Changelog
+# Changelogs for CodePilot
+> Created and Maintained by @erbanku and fellow AI agents
+
+## 07/11/2026
+
+- fix(runtime): Conflict check toggle (default off) now also suppresses Claude CLI multi-install scan/warnings in `/api/claude-status`, not only the preference-vs-actual drift banner (PR #5 gap)
+- fix(platform): dedupe npm/bun wrapper vs `node_modules/@anthropic-ai/claude-code` realpath as one install (#623 false positive)
+- chore: ignore `.vscode/`
 
 ## [0.38.4] - 2026-03-20
 

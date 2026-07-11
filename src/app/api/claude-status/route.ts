@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { findClaudeBinary, getClaudeVersion, findAllClaudeBinaries, classifyClaudePath, isWindows, findGitBash, isWingetInstall } from '@/lib/platform';
 import type { ClaudeInstallInfo, ClaudeInstallType } from '@/lib/platform';
+import { getSetting } from '@/lib/db';
+
+/** Opt-in: multi-install conflict scan is expensive and noisy by default. */
+function isRuntimeConflictCheckEnabled(): boolean {
+  return getSetting('runtime_conflict_check_enabled') === 'true';
+}
 
 /** Latest version cache */
 let cachedLatestVersion: string | null = null;
@@ -89,13 +95,19 @@ export async function GET() {
       }
     }
 
-    // Detect other installations for conflict warning
+    // Detect other installations for conflict warning — only when the
+    // Settings → Runtime "Conflict check" toggle is explicitly on.
+    // Default off: skips the expensive PATH scan and stops false-positive
+    // "1 other Claude CLI installation(s) detected" noise (#623 / PR #5 gap).
     let otherInstalls: ClaudeInstallInfo[] = [];
-    try {
-      const all = findAllClaudeBinaries();
-      otherInstalls = all.filter(i => i.path !== claudePath);
-    } catch {
-      // non-critical — don't fail the status check
+    const conflictCheckEnabled = isRuntimeConflictCheckEnabled();
+    if (conflictCheckEnabled) {
+      try {
+        const all = findAllClaudeBinaries();
+        otherInstalls = all.filter(i => i.path !== claudePath);
+      } catch {
+        // non-critical — don't fail the status check
+      }
     }
 
     // Detect supported features based on CLI version
@@ -124,7 +136,7 @@ export async function GET() {
     if (missingGit) {
       warnings.push('Git Bash not found — some features may not work');
     }
-    if (otherInstalls.length > 0) {
+    if (conflictCheckEnabled && otherInstalls.length > 0) {
       warnings.push(`${otherInstalls.length} other Claude CLI installation(s) detected`);
     }
 
